@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b98">
+  <title>Cocina — Café Tea Time · Fundación Inclusión Azul</title>
+  <style>
+    :root {
+      --bg: #edf5fa;
+      --paper: #fff;
+      --blue: #176b98;
+      --blue-dark: #104a6c;
+      --blue-pale: #dfeff8;
+      --orange: #f5b75a;
+      --cream: #fff6e6;
+      --green: #28845f;
+      --green-pale: #e6f5ed;
+      --red: #bf4946;
+      --red-pale: #fff0ee;
+      --ink: #253746;
+      --muted: #647989;
+      --stroke: #d8e6ee;
+      --shadow: 0 12px 30px rgba(19,78,113,.08);
+      --ease: cubic-bezier(.2,.8,.2,1);
+      font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; padding: 22px; min-height: 100vh; background: var(--bg); color: var(--ink); }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, a:focus-visible, textarea:focus-visible, select:focus-visible {
+      outline: 3px solid var(--orange); outline-offset: 3px;
+    }
+    .wrap { max-width: 1200px; margin: auto; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 15px;
+      flex-wrap: wrap; padding: 16px 21px; background: var(--paper); border: 1px solid var(--stroke);
+      border-radius: 24px; box-shadow: var(--shadow); margin-bottom: 24px;
+    }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .mark {
+      position: relative; display: grid; place-items: center; width: 64px; height: 64px;
+      border-radius: 21px 21px 11px 21px; background: var(--blue); color: #fff; flex: none;
+    }
+    .mark svg { width: 38px; height: 38px; }
+    .mark::after {
+      content: ''; position: absolute; width: 11px; height: 11px; border-radius: 50%;
+      border: 2px solid #fff; background: var(--orange); top: -4px; right: -4px;
+    }
+    .brand strong { display: block; color: var(--blue-dark); font-weight: 900; font-size: 1.19rem; }
+    .brand small { display: block; color: var(--muted); margin-top: 3px; font-weight: 700; }
+    .header-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .user-badge { padding: 11px 14px; background: var(--blue-pale); color: var(--blue-dark); font-weight: 900; border-radius: 13px; }
+    .header-link { text-decoration: none; display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 10px 14px;
+      border: 2px solid var(--stroke); border-radius: 13px; font-weight: 800; color: var(--blue-dark); background: #fff; }
+    .header-link:hover { border-color: var(--blue); background: var(--blue-pale); }
+    .hero {
+      display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;
+      padding: 24px 27px; border: 1px solid var(--stroke); border-radius: 26px;
+      background: var(--paper); box-shadow: var(--shadow); margin-bottom: 18px; animation: appear .4s var(--ease);
+    }
+    .hero-top { display: flex; align-items: center; gap: 14px; }
+    .step { display: grid; place-items: center; width: 56px; height: 56px; background: var(--orange); color: #5d4010; border-radius: 19px 19px 8px 19px; font-size: 1.55rem; flex: none; }
+    .eyebrow { margin: 0 0 4px; text-transform: uppercase; letter-spacing: .09em; font-size: .75rem; color: var(--muted); font-weight: 900; }
+    h1 { margin: 0; font-size: clamp(1.6rem,3vw,2.1rem); line-height: 1.1; color: var(--blue-dark); }
+    .hero-note { margin: 7px 0 0; color: var(--muted); font-weight: 700; font-size: .92rem; }
+    .update-area { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
+    .connection { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; color: var(--green); font-size: .9rem; }
+    .connection::before { content: ''; background: var(--green); width: 10px; height: 10px; border-radius: 50%; }
+    .connection.offline { color: var(--red); }
+    .connection.offline::before { background: var(--red); }
+    .refresh { min-height: 45px; background: var(--blue-pale); color: var(--blue-dark); border: 0; border-radius: 13px; padding: 10px 15px; font-weight: 900; }
+    .refresh:hover { background: #c9e6f5; }
+    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-bottom: 22px; }
+    .metric { display: flex; gap: 12px; align-items: center; padding: 19px; border: 1px solid var(--stroke); border-radius: 20px 20px 9px 20px; background: #fff; }
+    .metric-symbol { width: 47px; height: 47px; border-radius: 15px 15px 7px 15px; display: grid; place-items: center; font-size: 1.35rem; flex: none; }
+    .metric.pending .metric-symbol { background: var(--cream); }
+    .metric.ready .metric-symbol { background: var(--green-pale); }
+    .metric.issue .metric-symbol { background: var(--red-pale); }
+    .metric .value { display: block; font-weight: 900; font-size: 1.65rem; line-height: 1; color: var(--blue-dark); }
+    .metric .label { display: block; color: var(--muted); font-weight: 800; font-size: .83rem; margin-top: 5px; }
+    .board { background: var(--paper); border: 1px solid var(--stroke); padding: 23px; box-shadow: var(--shadow); border-radius: 27px; min-height: 380px; }
+    .board-header { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 19px; }
+    .board-header h2 { color: var(--blue-dark); margin: 0; font-size: 1.26rem; }
+    .board-header small { color: var(--muted); font-weight: 700; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 19px; }
+    .tab { min-height: 47px; padding: 10px 16px; border: 2px solid var(--stroke); border-radius: 14px 14px 6px 14px; background: #fff;
+      color: var(--blue-dark); font-weight: 900; transition: background .18s,border-color .18s,transform .18s var(--ease); }
+    .tab:hover { background: var(--blue-pale); transform: translateY(-2px); }
+    .tab[aria-selected="true"] { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .tab-count { display: inline-flex; align-items: center; justify-content: center; margin-left: 4px; min-width: 24px; border-radius: 9px; background: rgba(23,107,152,.1); padding: 3px 6px; }
+    .tab[aria-selected="true"] .tab-count { background: rgba(255,255,255,.2); }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+    .order-card { padding: 19px; border: 2px solid var(--stroke); border-radius: 22px 22px 10px 22px; background: #fff; animation: appear .28s var(--ease) both; }
+    .order-card.issue { border-color: #edc7c1; }
+    .order-card.ready { border-color: #c6e6d4; }
+    .order-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 13px; }
+    .order-title { font-size: 1.23rem; font-weight: 900; color: var(--blue-dark); margin: 0 0 6px; }
+    .order-time { margin: 0; font-size: .85rem; color: var(--muted); font-weight: 700; }
+    .status-pill { display: inline-flex; border-radius: 100px; padding: 7px 10px; font-size: .75rem; font-weight: 900; white-space: nowrap; background: var(--cream); color: #79501a; }
+    .status-pill.ready { background: var(--green-pale); color: #176341; }
+    .status-pill.issue { background: var(--red-pale); color: #9f3b36; }
+    .order-meta { font-size: .86rem; font-weight: 700; color: var(--muted); margin: 0 0 14px; }
+    .order-products { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 7px; }
+    .order-products li { display: flex; align-items: baseline; gap: 10px; padding: 9px 10px; border-radius: 11px; background: #f3f8fb; font-size: .99rem; font-weight: 800; }
+    .qty { flex: none; min-width: 34px; background: var(--blue-pale); color: var(--blue-dark); padding: 4px 6px; border-radius: 7px; text-align: center; font-size: .89rem; }
+    .reason { padding: 13px; background: var(--red-pale); border-radius: 13px; margin-bottom: 15px; color: #85352f; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
+    .card-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+    .action { display: inline-flex; align-items: center; justify-content: center; flex: 1; min-width: 140px; min-height: 49px; border: 0; border-radius: 13px; padding: 10px 14px; font-weight: 900;
+      transition: transform .18s var(--ease),filter .18s; }
+    .action:hover { transform: translateY(-2px); filter: brightness(.94); }
+    .action:disabled { opacity: .55; cursor: wait; transform: none; }
+    .action.done { background: var(--green); color: #fff; }
+    .action.alert { background: var(--red-pale); color: #9f3b36; border: 2px solid #eabfba; }
+    .action.retry { background: var(--blue-pale); color: var(--blue-dark); }
+    .empty { text-align: center; padding: 55px 18px; color: var(--muted); font-weight: 800; border: 2px dashed var(--stroke); border-radius: 18px; grid-column: 1/-1; }
+    .empty .big { display: block; font-size: 2.6rem; margin-bottom: 9px; }
+    .message { margin-bottom: 17px; background: var(--green-pale); padding: 12px 15px; border-radius: 13px; font-weight: 800; color: #176341; }
+    .message.error { background: var(--red-pale); color: #9f3b36; }
+    .message[hidden] { display: none; }
+    .modal[hidden] { display: none; }
+    .modal { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(16,49,73,.58); padding: 16px; z-index: 20; }
+    .modal-card { width: min(100%,510px); padding: 28px; background: #fff; border-radius: 25px; box-shadow: 0 20px 45px rgba(0,0,0,.17); animation: appear .22s var(--ease); }
+    .modal-card h2 { color: var(--blue-dark); font-size: 1.45rem; margin: 0 0 8px; }
+    .modal-card p { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-weight: 900; color: var(--blue-dark); margin-bottom: 7px; }
+    .field select, .field textarea { width: 100%; padding: 12px; border-radius: 13px; border: 2px solid var(--stroke); color: var(--ink); background: #fff; }
+    .field textarea { min-height: 95px; resize: vertical; }
+    .modal-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .modal-actions button { min-height: 48px; flex: 1; border-radius: 13px; border: none; padding: 12px; font-weight: 900; }
+    .btn-cancel { background: var(--blue-pale); color: var(--blue-dark); }
+    .btn-report { background: var(--red); color: #fff; }
+    .modal-actions button:disabled { opacity:.6; }
+    @keyframes appear { from { opacity:0; transform:translateY(9px); } to { opacity:1; transform:translateY(0); } }
+    @media(max-width:820px) { .cards { grid-template-columns:1fr; } }
+    @media(max-width:600px) {
+      body { padding:12px; }
+      .topbar,.hero,.board { padding:16px; border-radius:21px; }
+      .metrics { gap:8px; }
+      .metric { padding:12px 9px; flex-direction:column; text-align:center; gap:7px; }
+      .metric-symbol { width:40px; height:40px; }
+      .metric .value { font-size:1.4rem; }
+      .metric .label { font-size:.75rem; }
+      .header-actions { width:100%; }
+      .header-link { flex:1; }
+      .tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .tab { padding:9px 4px; font-size:.82rem; }
+      .order-card { padding:14px; }
+      .action { min-width:100%; }
+    }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M11 19h24v11a12 12 0 0 1-12 12 12 12 0 0 1-12-12V19Z" fill="#fff"/>
+            <path d="M35 22h4a5 5 0 0 1 0 10h-5" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+            <path d="M18 5c-3 4 3 6 0 10M27 5c-3 4 3 6 0 10" stroke="#F5B75A" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div><strong>Café Tea Time</strong><small>Cocina · Fundación Inclusión Azul</small></div>
+      </div>
+      <div class="header-actions">
+        <div class="user-badge">👩‍🍳 {{ nombre }}</div>
+        <a class="header-link" href="{% url 'cerrarSesion' %}">Cerrar sesión</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-top">
+        <div class="step" aria-hidden="true">🍳</div>
+        <div>
+          <p class="eyebrow">Estación de preparación</p>
+          <h1>Pedidos en cocina</h1>
+          <p class="hero-note">Aquí aparecen los pedidos confirmados de hoy.</p>
+        </div>
+      </div>
+      <div class="update-area">
+        <span class="connection" id="connection">Conectado</span>
+        <button class="refresh" type="button" id="refresh">↻ Actualizar</button>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Resumen de pedidos">
+      <div class="metric pending"><div class="metric-symbol" aria-hidden="true">⏳</div><div><span class="value" id="n-pendientes">0</span><span class="label">Pendientes</span></div></div>
+      <div class="metric ready"><div class="metric-symbol" aria-hidden="true">✓</div><div><span class="value" id="n-listos">0</span><span class="label">Listos</span></div></div>
+      <div class="metric issue"><div class="metric-symbol" aria-hidden="true">⚠</div><div><span class="value" id="n-alertas">0</span><span class="label">Con problema</span></div></div>
+    </section>
+
+    <section class="board" aria-labelledby="board-title">
+      <div class="board-header">
+        <div><h2 id="board-title">Organiza tus pedidos</h2><small id="last-updated">Conectando con la base de datos…</small></div>
+        <small>Actualización automática cada 5 segundos</small>
+      </div>
+      <p class="message" id="message" role="status" hidden></p>
+      <div class="tabs" role="tablist" aria-label="Estado de los pedidos">
+        <button class="tab" type="button" role="tab" data-tab="pendientes" aria-selected="true">⏳ Pendientes <span class="tab-count" id="tab-pendientes">0</span></button>
+        <button class="tab" type="button" role="tab" data-tab="listos" aria-selected="false">✓ Listos <span class="tab-count" id="tab-listos">0</span></button>
+        <button class="tab" type="button" role="tab" data-tab="alertas" aria-selected="false">⚠ Alertas <span class="tab-count" id="tab-alertas">0</span></button>
+      </div>
+      <div class="cards" id="cards" aria-live="off">
+        <div class="empty"><span class="big" aria-hidden="true">☕</span>Cargando pedidos…</div>
+      </div>
+    </section>
+  </main>
+
+  <form id="csrf-form" hidden>{% csrf_token %}</form>
+  <div class="modal" id="incident-modal" hidden>
+    <form class="modal-card" id="incident-form" role="dialog" aria-modal="true" aria-labelledby="incident-title">
+      <h2 id="incident-title">⚠ Reportar un problema</h2>
+      <p id="incident-description">Indica qué ocurre con el pedido. El problema quedará registrado en Cocina.</p>
+      <div class="field">
+        <label for="incident-reason">¿Qué está pasando?</label>
+        <select id="incident-reason" required>
+          <option value="Falta un producto">Falta un producto</option>
+          <option value="Producto agotado">Producto agotado</option>
+          <option value="Información incorrecta">Información incorrecta</option>
+          <option value="Otro inconveniente">Otro inconveniente</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="incident-note">Detalle adicional (opcional)</label>
+        <textarea id="incident-note" maxlength="140" placeholder="Ejemplo: Falta especificar el tipo de bebida"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="cancel-incident">Cancelar</button>
+        <button type="submit" class="btn-report" id="submit-incident">Enviar alerta</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const URL_DATOS = "{% url 'menuCocinaDatos' %}";
+    const URL_CAMBIAR_BASE = "{% url 'menuCocinaActualizar' pedido_id=0 %}";
+    const tokenCSRF = document.querySelector('#csrf-form [name=csrfmiddlewaretoken]').value;
+    const contenedor = document.getElementById('cards');
+    const mensaje = document.getElementById('message');
+    const modal = document.getElementById('incident-modal');
+    const formIncidente = document.getElementById('incident-form');
+    const razon = document.getElementById('incident-reason');
+    const nota = document.getElementById('incident-note');
+    let datos = { pendientes: [], listos: [], alertas: [] };
+    let tabActual = 'pendientes';
+    let firma = '';
+    let cargando = false;
+    let modificando = false;
+    let pedidoIncidente = null;
+    let primeraCarga = true;
+
+    const etiquetas = {pendientes:'Pendiente',listos:'Listo',alertas:'Con problema'};
+    const estados = {pendientes:'pendiente',listos:'listo',alertas:'issue'};
+
+    function elemento(tag, clase, texto) {
+      const nodo = document.createElement(tag);
+      if (clase) nodo.className = clase;
+      if (texto !== undefined) nodo.textContent = String(texto);
+      return nodo;
+    }
+
+    function mostrarMensaje(texto, error = false) {
+      mensaje.textContent = texto;
+      mensaje.classList.toggle('error', error);
+      mensaje.hidden = false;
+      if (!error) window.setTimeout(() => { if (mensaje.textContent === texto) mensaje.hidden = true; }, 4000);
+    }
+
+    function boton(texto, accion, id, clase) {
+      const b = elemento('button', `action ${clase}`, texto);
+      b.type = 'button';
+      b.dataset.accion = accion;
+      b.dataset.id = id;
+      return b;
+    }
+
+    function mostrarTarjetas() {
+      const fragmento = document.createDocumentFragment();
+      const lista = datos[tabActual] || [];
+
+      if (!lista.length) {
+        const vacio = elemento('div', 'empty');
+        const icono = elemento('span', 'big', tabActual === 'pendientes' ? '✅' : '☕');
+        icono.setAttribute('aria-hidden','true');
+        vacio.append(icono, document.createTextNode(
+          tabActual === 'pendientes' ? '¡Todo al día! No hay pedidos pendientes.' :
+          tabActual === 'listos' ? 'Aún no hay pedidos listos hoy.' : 'No hay alertas registradas hoy.'
+        ));
+        fragmento.append(vacio);
+      }
+      lista.forEach(pedido => {
+        const estado = estados[tabActual];
+        const tarjeta = elemento('article', `order-card ${estado}`);
+        const encabezado = elemento('div', 'order-head');
+        const titulo = elemento('div');
+        titulo.append(elemento('h3', 'order-title', `Pedido #${pedido.id}`));
+        titulo.append(elemento('p','order-time', `Recibido: ${pedido.hora}`));
+        encabezado.append(titulo, elemento('span',`status-pill ${estado}`, etiquetas[tabActual]));
+        tarjeta.append(encabezado);
+        tarjeta.append(elemento('p', 'order-meta', `Atendido por: ${pedido.vendedor}`));
+
+        const productos = elemento('ul', 'order-products');
+        pedido.productos.forEach(producto => {
+          const item = elemento('li');
+          item.append(elemento('span','qty',`×${producto.cantidad}`));
+          item.append(elemento('span','', producto.nombre));
+          productos.append(item);
+        });
+        tarjeta.append(productos);
+
+        if (tabActual === 'alertas' && pedido.observacion) {
+          tarjeta.append(elemento('div', 'reason', `⚠ ${pedido.observacion}`));
+        }
+        const acciones = elemento('div', 'card-actions');
+        if (tabActual === 'pendientes') {
+          acciones.append(boton('✓ Marcar listo', 'listo', pedido.id, 'done'));
+          acciones.append(boton('⚠ Reportar problema', 'alerta', pedido.id, 'alert'));
+        } else if (tabActual === 'alertas') {
+          acciones.append(boton('↩ Volver a preparación', 'pendiente', pedido.id, 'retry'));
+        } else {
+          acciones.append(boton('↩ Reabrir pedido', 'pendiente', pedido.id, 'retry'));
+        }
+        tarjeta.append(acciones);
+        fragmento.append(tarjeta);
+      });
+      contenedor.replaceChildren(fragmento);
+    }
+
+    function actualizarResumen(resumen) {
+      for (const [clave, valor] of Object.entries({pendientes:'pendientes',listos:'listos',alertas:'alertas'})) {
+        document.getElementById('n-' + clave).textContent = resumen[valor] ?? 0;
+        document.getElementById('tab-' + clave).textContent = resumen[valor] ?? 0;
+      }
+    }
+
+    async function cargarPedidos(forzar = false) {
+      if (cargando || modificando || (!forzar && document.hidden)) return;
+      cargando = true;
+      try {
+        const respuesta = await fetch(URL_DATOS, {credentials:'same-origin', cache:'no-store'});
+        if (!respuesta.ok) throw new Error('No se pudo consultar la cocina (' + respuesta.status + ').');
+        const json = await respuesta.json();
+        const nuevaFirma = JSON.stringify(json.pedidos);
+        const antes = datos.pendientes.length;
+        datos = json.pedidos;
+        actualizarResumen(json.resumen);
+        if (nuevaFirma !== firma) {
+          firma = nuevaFirma;
+          mostrarTarjetas();
+          if (!primeraCarga && datos.pendientes.length > antes) {
+            mostrarMensaje('☕ ¡Llegó un nuevo pedido a cocina!');
+          }
+        }
+        primeraCarga = false;
+        document.getElementById('last-updated').textContent = 'Última consulta: ' + new Date().toLocaleTimeString('es-CL', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        const conexion = document.getElementById('connection');
+        conexion.classList.remove('offline');
+        conexion.textContent = 'Conectado';
+      } catch (error) {
+        const conexion = document.getElementById('connection');
+        conexion.classList.add('offline');
+        conexion.textContent = 'Sin conexión';
+        mostrarMensaje('No fue posible actualizar los pedidos. Intenta nuevamente.', true);
+        console.error(error);
+      } finally { cargando = false; }
+    }
+
+    async function cambiarEstado(id, accion, observacion = '') {
+      if (modificando) return false;
+      modificando = true;
+      contenedor.querySelectorAll('button').forEach(b => b.disabled = true);
+      try {
+        const url = URL_CAMBIAR_BASE.replace('/0/', `/${encodeURIComponent(id)}/`);
+        const respuesta = await fetch(url, {
+          method: 'POST', credentials: 'same-origin',
+          headers: {'Content-Type':'application/json', 'X-CSRFToken': tokenCSRF},
+          body: JSON.stringify({accion, observacion})
+        });
+        let resultado;
+        try { resultado = await respuesta.json(); } catch { resultado = {}; }
+        if (!respuesta.ok) throw new Error(resultado.error || 'No se pudo cambiar el estado.');
+        firma = '';
+        mostrarMensaje(resultado.mensaje || 'Pedido actualizado.');
+        return true;
+      } catch (error) {
+        mostrarMensaje(error.message, true);
+        return false;
+      } finally {
+        modificando = false;
+        contenedor.querySelectorAll('button').forEach(b => b.disabled = false);
+        await cargarPedidos(true);
+      }
+    }
+
+    function cerrarIncidente() {
+      modal.hidden = true;
+      pedidoIncidente = null;
+      formIncidente.reset();
+    }
+
+    contenedor.addEventListener('click', async event => {
+      const b = event.target.closest('button[data-accion]');
+      if (!b || modificando) return;
+      const id = Number(b.dataset.id);
+      const accion = b.dataset.accion;
+      if (accion === 'alerta') {
+        pedidoIncidente = id;
+        document.getElementById('incident-title').textContent = `⚠ Reportar problema · Pedido #${id}`;
+        modal.hidden = false;
+        razon.focus();
+        return;
+      }
+      if (accion === 'pendiente' && !confirm('¿Volver a colocar este pedido en preparación?')) return;
+      await cambiarEstado(id, accion);
+    });
+
+    formIncidente.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!pedidoIncidente) return;
+      const id = pedidoIncidente;
+      const detalle = nota.value.trim();
+      const motivo = razon.value + (detalle ? ' — ' + detalle : '');
+      const botonEnviar = document.getElementById('submit-incident');
+      botonEnviar.disabled = true;
+      try {
+        const ok = await cambiarEstado(id, 'alerta', motivo);
+        if (ok) cerrarIncidente();
+      } finally { botonEnviar.disabled = false; }
+    });
+    document.getElementById('cancel-incident').addEventListener('click', cerrarIncidente);
+    modal.addEventListener('click', event => { if (event.target === modal) cerrarIncidente(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && !modal.hidden) cerrarIncidente(); });
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabActual = tab.dataset.tab;
+        document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t === tab)));
+        mostrarTarjetas();
+      });
+    });
+    document.getElementById('refresh').addEventListener('click', () => cargarPedidos(true));
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) cargarPedidos(true); });
+    cargarPedidos(true);
+    window.setInterval(() => cargarPedidos(), 5000);
+  </script>
+
+<script>
+/* Restauración desde el historial: revalidar permisos y sesión con Django. */
+window.addEventListener('pageshow', function (evento) {
+    const navegacion = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (evento.persisted || (navegacion && navegacion.type === 'back_forward')) {
+        window.location.reload();
+    }
+});
+</script>
+</body>
+</html>

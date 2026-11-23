@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="es">
+<head>
+    {% load filtros %}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Menú Digital — Fundación Inclusión Azul</title>
+    <style>
+        :root{
+            --bg:#f5f7fb;
+            --card:#ffffff;
+            --accent:#1f6f9f;
+            --accent-2:#4ba3c7;
+            --muted:#6b7380;
+            --shadow:0 8px 30px rgba(31,47,63,0.08);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+        }
+        *{box-sizing:border-box}
+        body{margin:0;background:linear-gradient(180deg,#eef6fb 0%,var(--bg) 100%);color:#222;padding:20px}
+        .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 380px;gap:22px;align-items:start}
+        header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+        .brand{display:flex;align-items:center;gap:12px}
+        .mark{width:58px;height:58px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;font-weight:700;font-size:18px}
+        h1{margin:0;font-size:20px}
+        .user-badge{background:var(--accent);color:#fff;padding:8px 14px;border-radius:10px;font-size:14px;font-weight:600}
+        .logout-btn{background:#fff;border:1px solid #e6edf4;color:var(--accent);padding:8px 12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+        .logout-btn:hover{background:#f0f8fc}
+        .categories{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:18px 0}
+        .category-card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;cursor:pointer;transition:transform .2s, box-shadow .2s}
+        .category-card:hover{transform:translateY(-4px);box-shadow:0 8px 25px rgba(31,111,159,0.15)}
+        .category-card.active{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff}
+        .category-card img{width:60px;height:60px;margin-bottom:10px;object-fit:cover;border-radius:12px}
+        .category-card span{font-weight:600}
+        .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+        .product{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;transition:transform .15s}
+        .product:hover{transform:translateY(-3px)}
+        .product img{width:100%;height:150px;object-fit:cover;border-radius:10px}
+        .info h3{margin:0;font-size:16px}
+        .info p{margin:4px 0 0 0;color:var(--muted);font-size:13px}
+        .meta{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+        .price{font-weight:700;color:var(--accent)}
+        .btn{background:var(--accent);color:white;padding:8px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+        .btn:hover{background:var(--accent-2)}
+        .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:var(--shadow)}
+        .cart-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+        .cart-item{display:flex;gap:10px;align-items:center;justify-content:space-between}
+        .cart-item .title{flex:1}
+        .cart-item input{width:50px;padding:4px;text-align:center;border:1px solid #ddd;border-radius:6px}
+        .total{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:18px;margin-top:12px}
+        .small{font-size:13px;color:var(--muted)}
+        /* Modal */
+        #confirmModal{
+            position:fixed;top:0;left:0;width:100%;height:100%;
+            background:rgba(0,0,0,0.5);
+            display:none;align-items:center;justify-content:center;
+            animation:fadeIn .3s ease;
+        }
+        #confirmModal .box{
+            background:#fff;padding:24px;border-radius:16px;
+            box-shadow:0 8px 28px rgba(0,0,0,0.2);
+            max-width:500px;width:90%;animation:scaleIn .25s ease;
+        }
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        @keyframes scaleIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+        .success{
+            text-align:center;
+            padding:30px;
+        }
+        .success-check{
+            width:80px;height:80px;
+            border-radius:50%;
+            background:#4caf50;
+            color:white;
+            display:flex;align-items:center;justify-content:center;
+            font-size:42px;
+            margin:0 auto 16px auto;
+            animation:pop .4s ease;
+        }
+        @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+
+        /* Estilo para que el texto en <a> no quede morado*/
+        a:visited{
+            color: inherit
+        }
+
+        /* mensaje de exito */
+        .alerta-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .alerta-contenido {
+            background: #ffffff;
+            padding: 25px 35px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: sans-serif;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .alerta-contenido h3 {
+            margin-top: 0;
+            color: #2e7d32;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .alerta-boton {
+            background: #2e7d32;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            margin-top: 10px;
+        }
+
+        .alerta-boton:hover {
+            background: #256428;
+        }
+
+        /* --- ESTILOS PARA LA SECCIÓN DE PROPINA --- */
+        .totals-section {
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .total-final {
+            font-size: 1.5em;
+            font-weight: 800;
+            color: var(--accent);
+            padding-top: 10px;
+            border-top: 2px solid var(--accent-2);
+            margin-top: 10px;
+        }
+        .tip-selection-header {
+            font-weight:600; 
+            display:block; 
+            margin-top:10px;
+            margin-bottom:8px; 
+            color:var(--accent); 
+        }
+        .tip-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .tip-button {
+            background: var(--card);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 8px 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9em;
+            transition: background 0.2s;
+        }
+        .tip-button:hover, .tip-button.selected {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        /* --- FIN NUEVOS ESTILOS --- */
+    </style>
+</head>
+<body>
+
+    {% load static %}
+
+    <main class="wrap">
+        <header>
+            <div class="brand">
+                <div class="mark">FI</div>
+                <h1>Menú Digital</h1>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+                
+                <div class="user-badge" id="userBadge">
+                    Usuario logeado: {{ nombre }}
+                </div>
+                <a href="/historialVendedor">
+                    <button class="logout-btn">
+                        Pedidos recientes
+                    </button>
+                </a>
+                <a href="/logout">
+                    <button class="logout-btn" id="logoutBtn">
+                        Cerrar sesión
+                    </button>
+                </a>
+            </div>
+        </header>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div role="status" style="margin:12px 0;padding:15px;border-radius:12px;background:#e4f4eb;color:#225c45;font-weight:800;">
+                    ✓ {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% if proceso == 1 %}
+        
+        <div id="alertaFullscreen" class="alerta-overlay">
+            <div class="alerta-contenido">
+                <h3>Éxito</h3>
+                <p>Se ha {{ procesoNombre }} con éxito</p>
+                <button class="alerta-boton" onclick="cerrarAlerta()">Aceptar</button>
+            </div>
+        </div>
+        {% endif %}
+
+        <section style="grid-column:1/-1">
+            <div class="categories" id="catContainer">
+                {% if opcion == 1 %}
+                <a href="/menu/1" style="text-decoration: none;"> <div class="category-card active"> <img src="{% static 'fotos/Almuerzo.jpg' %}" alt="Almuerzo"> <span>Almuerzo</span> </div> </a>
+                <a href="/menu/2" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Sopas.jpg' %}" alt="Sopa"> <span>Sopa</span> </div> </a>
+                <a href="/menu/3" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Jugos.jpg' %}" alt="Bebida"> <span>Bebida</span> </div> </a>
+                <a href="/menu/4" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Postre.webp' %}" alt="Postre"> <span>Postre</span> </div> </a>
+                {% elif opcion == 2 %}
+                <a href="/menu/1" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Almuerzo.jpg' %}" alt="Almuerzo"> <span>Almuerzo</span> </div> </a>
+                <a href="/menu/2" style="text-decoration: none;"> <div class="category-card active"> <img src="{% static 'fotos/Sopas.jpg' %}" alt="Sopa"> <span>Sopa</span> </div> </a>
+                <a href="/menu/3" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Jugos.jpg' %}" alt="Bebida"> <span>Bebida</span> </div> </a>
+                <a href="/menu/4" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Postre.webp' %}" alt="Postre"> <span>Postre</span> </div> </a>
+                {% elif opcion == 3 %}
+                <a href="/menu/1" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Almuerzo.jpg' %}" alt="Almuerzo"> <span>Almuerzo</span> </div> </a>
+                <a href="/menu/2" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Sopas.jpg' %}" alt="Sopa"> <span>Sopa</span> </div> </a>
+                <a href="/menu/3" style="text-decoration: none;"> <div class="category-card active"> <img src="{% static 'fotos/Jugos.jpg' %}" alt="Bebida"> <span>Bebida</span> </div> </a>
+                <a href="/menu/4" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Postre.webp' %}" alt="Postre"> <span>Postre</span> </div> </a>
+                {% elif opcion == 4 %}
+                <a href="/menu/1" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Almuerzo.jpg' %}" alt="Almuerzo"> <span>Almuerzo</span> </div> </a>
+                <a href="/menu/2" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Sopas.jpg' %}" alt="Sopa"> <span>Sopa</span> </div> </a>
+                <a href="/menu/3" style="text-decoration: none;"> <div class="category-card"> <img src="{% static 'fotos/Jugos.jpg' %}" alt="Bebida"> <span>Bebida</span> </div> </a>
+                <a href="/menu/4" style="text-decoration: none;"> <div class="category-card active"> <img src="{% static 'fotos/Postre.webp' %}" alt="Postre"> <span>Postre</span> </div> </a>
+                {% endif %}
+            </div>
+        </section>
+
+        <section>
+            <div class="products" id="products">
+                {% for x in pro %}
+                <div class="product">
+                    <form action="{% url 'agregar_carrito' x.id %}" method="POST">
+                        {% csrf_token %}
+                        <img src="../../media/{{ x.imagen }}">
+                        <div class="info">
+                            <h3> {{ x.nombre }} </h3>
+                            <p> {{ x.descripcion }} </p>
+                        </div>
+                        <div class="meta">
+                            <div class="price"> $ {{ x.precio }} </div>
+                            <div style="display:flex;gap:6px;align-items:center">
+                                <input type="number" min="1" value="1" style="width:50px;padding:6px;border:1px solid #ddd;border-radius:8px" name="cantidad">
+                                <button class="btn" type="submit">Añadir</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                {% empty %}
+                <div>No hay productos almacenados.</div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <aside class="card">
+            <div style="font-weight:700">Tu pedido</div>
+            <div class="cart-list" id="cartList">
+                {% for key, item in carrito.items %}
+                <div class="cart-item">
+                    <div class="title">{{ item.nombre }}</div>
+                    <input type="number" min="1" value="{{ item.cantidad }}" name="cantidad" disabled style="color:#555"> 
+                    <div><b>$ {{ item.precio|multiply:item.cantidad }}</b></div>
+                    <button style="background:#f44336;color:#fff;border:none;padding:4px 8px;border-radius:6px;cursor:pointer" onclick="window.location.href='{% url 'eliminar_del_carrito' key %}'" >✕</button>
+                </div>
+                {% empty %}
+                <div class="small"> No hay artículos en el carrito </div>
+                {% endfor %}
+            </div>
+            
+            <div class="totals-section">
+                <div class="totals-row">
+                    <span>Subtotal Productos</span>
+                    <span id="subtotal_display">$ {{ total }}</span>
+                </div>
+
+                <div class="totals-row">
+                    <span>Propina (<span id="tip_percent_display">0%</span>)</span>
+                    <span id="tip_amount_display">$ 0</span>
+                </div>
+
+                <label class="tip-selection-header">Seleccionar Propina</label>
+                <div class="tip-buttons">
+                    <button type="button" class="tip-button" data-tip="0.05">5%</button>
+                    <button type="button" class="tip-button" data-tip="0.10">10%</button>
+                    <button type="button" class="tip-button" data-tip="0.15">15%</button>
+                    <button type="button" class="tip-button" data-tip="0.20">20%</button>
+                </div>
+
+                <div class="totals-row total-final">
+                    <span>Total Final</span>
+                    <span id="total_final_display">$ {{ total }}</span>
+                </div>
+            </div>
+            
+            <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
+                
+                <form action="{% url 'finalizar' %}" method="POST" style="display:contents;">
+                    {% csrf_token %}
+                    
+                    <input type="hidden" name="propina_porcentaje" id="propina_porcentaje_input" value="0.00">
+
+                    <div style="margin-bottom: 15px;">
+                        <label for="ubicacion_input" style="font-weight:600;display:block;margin-bottom:6px;color:#222;font-size:14px;">Ubicación/Mesa:</label>
+                        <input type="text" id="ubicacion_input" name="ubicacion" placeholder="Ingresar mesa o Silla" 
+                            style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size:14px; color:#222; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: border-color 0.2s;" />
+                    </div>
+                    <label style="font-weight:600;display:block;margin-bottom:6px;color:var(--accent)">Método de pago</label>
+                    <div><label><input type="radio" name="tipoPago" value="Efectivo" checked> 💵 Efectivo</label></div>
+                    <div><label><input type="radio" name="tipoPago" value="Debito"> 💳 Tarjeta de Débito</label></div> 
+                    <div><label><input type="radio" name="tipoPago" value="Credito"> 💳 Tarjeta de Crédito</label></div> 
+                    <div><label><input type="radio" name="tipoPago" value="Transferencia"> 📲 Transferencia</label></div>
+                    
+                    <button class="btn" id="btnCheckout" type="submit" style="margin-top:10px;">Finalizar</button>
+                </form>
+            </div>
+            
+            <button style="background:#fff;border:1px solid #eef6fb;padding:8px 12px;border-radius:10px;cursor:pointer" id="btnClear" onclick="window.location.href='{% url 'vaciar_carrito' %}'">Limpiar</button>
+            <details style="margin-top:13px;padding:14px;border:2px solid #d8e6ee;border-radius:14px;background:#fff;">
+                <summary style="cursor:pointer;font-weight:800;color:#a43333;">Cancelar pedido con motivo</summary>
+                <form method="POST" action="{% url 'cancelar_carrito' %}" style="margin-top:13px;display:flex;flex-direction:column;gap:9px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="origen" value="menu">
+                    <label for="motivo_cancelacion_menu" style="font-weight:700;">¿Por qué se canceló el pedido?</label>
+                    <textarea name="motivo_cancelacion" id="motivo_cancelacion_menu" rows="3" maxlength="250" required
+                        placeholder="Escribe el motivo antes de confirmar"
+                        style="width:100%;border:2px solid #d8e6ee;border-radius:10px;padding:12px;font:inherit;"></textarea>
+                    <button type="submit" style="min-height:46px;border:0;border-radius:12px;color:white;background:#b63b3b;font-weight:800;cursor:pointer;">Confirmar cancelación</button>
+                </form>
+            </details>
+        </aside>
+    </main>
+
+    <script>
+        // Función de utilidad para formatear moneda
+        const formatter = new Intl.NumberFormat('es-CL', {
+            style: 'currency',
+            currency: 'CLP', // Asumiendo pesos chilenos por el formato de código
+            minimumFractionDigits: 0
+        });
+
+        function formatCurrency(amount) {
+            // Utilizamos el filtro de Django para el subtotal, pero en JS trabajamos con números puros.
+            return formatter.format(amount).replace('CLP', '$');
+        }
+
+        function calcularPropinaYTotal(subtotal, porcentaje) {
+            const propinaMonto = subtotal * porcentaje;
+            const totalFinal = subtotal + propinaMonto;
+            
+            document.getElementById('tip_percent_display').textContent = `${(porcentaje * 100).toFixed(0)}%`;
+            document.getElementById('tip_amount_display').textContent = formatCurrency(propinaMonto);
+            
+            // Actualizar el display del Total Final
+            document.getElementById('total_final_display').textContent = formatCurrency(totalFinal);
+            
+            // Actualizar el campo oculto para Django
+            document.getElementById('propina_porcentaje_input').value = porcentaje.toFixed(2);
+        }
+
+        // Obtener el subtotal inicial del HTML (el valor de 'total' de Django)
+        let subtotalStr = '{{ total }}'.replace('$', '').trim();
+        // Eliminar cualquier separador de miles (puntos o comas)
+        subtotalStr = subtotalStr.replace(/\./g, '').replace(/,/g, ''); 
+        const subtotalInicial = parseInt(subtotalStr) || 0; 
+        
+        // Añadir listeners a los botones de propina
+        document.querySelectorAll('.tip-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const porcentaje = parseFloat(this.getAttribute('data-tip'));
+                
+                // Remover clase 'selected' de todos los botones
+                document.querySelectorAll('.tip-button').forEach(btn => btn.classList.remove('selected'));
+                
+                // Añadir clase 'selected' al botón presionado
+                this.classList.add('selected');
+
+                // Recalcular el total
+                calcularPropinaYTotal(subtotalInicial, porcentaje);
+            });
+        });
+
+        // Inicializar la visualización de totales al cargar
+        calcularPropinaYTotal(subtotalInicial, 0.00); 
+
+        function cerrarAlerta() {
+            document.getElementById("alertaFullscreen").style.display = "none";
+            window.location.href = "/menu/1";
+        }
+    </script>
+
+<script>
+/* Restauración desde el historial: revalidar permisos y sesión con Django. */
+window.addEventListener('pageshow', function (evento) {
+    const navegacion = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (evento.persisted || (navegacion && navegacion.type === 'back_forward')) {
+        window.location.reload();
+    }
+});
+</script>
+</body>
+</html>

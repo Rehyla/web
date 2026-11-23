@@ -1,0 +1,475 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b98">
+  <title>Gestión de productos — Café Tea Time · Fundación Inclusión Azul</title>
+  <style>
+    :root {
+      --bg: #edf5fa;
+      --white: #fff;
+      --blue: #176b98;
+      --blue-dark: #104a6c;
+      --blue-pale: #dfeff8;
+      --sky: #bee3f4;
+      --cream: #fff6e6;
+      --orange: #f5b75a;
+      --green: #28845f;
+      --green-pale: #e4f4eb;
+      --red: #c94c4c;
+      --red-pale: #fff0ee;
+      --ink: #253746;
+      --muted: #647989;
+      --stroke: #d8e6ee;
+      --shadow: 0 12px 30px rgba(19,78,113,.08);
+      --ease: cubic-bezier(.2,.8,.2,1);
+      font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); padding: 24px; }
+    button, input, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { cursor: pointer; }
+    :is(a,button,input,select):focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+    .wrap { width: min(100%,1230px); margin: 0 auto; }
+    /* BARRA SUPERIOR: MISMA IDENTIDAD DE CAFÉ TEA TIME */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px; background: var(--white);
+      border: 1px solid var(--stroke); border-radius: 24px;
+      padding: 16px 21px; box-shadow: var(--shadow); margin-bottom: 24px;
+      animation: arrive .42s var(--ease) both;
+    }
+    .brand { display: flex; align-items: center; gap: 13px; text-decoration: none; min-width: 0; }
+    .brand-mark {
+      display: grid; place-items: center; position: relative; flex: none;
+      width: 64px; height: 64px; background: var(--blue); color: #fff;
+      border-radius: 21px 21px 11px 21px;
+    }
+    .brand-mark svg { width: 38px; height: 38px; }
+    .brand-mark::after {
+      content: ''; position: absolute; top: -4px; right: -4px;
+      width: 11px; height: 11px; background: var(--orange);
+      border: 2px solid var(--white); border-radius: 50%;
+    }
+    .brand-title { display: block; color: var(--blue-dark); font-size: 1.21rem; font-weight: 900; }
+    .brand-subtitle { display: block; color: var(--muted); font-size: .86rem; font-weight: 700; margin-top: 3px; }
+    .header-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+    .user-badge { background: var(--blue-pale); color: var(--blue-dark); padding: 11px 13px; border-radius: 13px; font-weight: 900; font-size: .9rem; }
+    .top-link {
+      display: inline-flex; justify-content: center; align-items: center; gap: 7px;
+      min-height: 44px; padding: 10px 13px; text-decoration: none;
+      border: 2px solid var(--stroke); border-radius: 13px;
+      background: var(--white); color: var(--blue-dark); font-size: .88rem;
+      font-weight: 800; transition: transform .2s var(--ease), background .2s, border-color .2s;
+    }
+    .top-link:hover { background: var(--blue-pale); border-color: var(--blue); transform: translateY(-2px); }
+    .top-link.back { background: var(--blue); border-color: var(--blue); color: white; }
+    .top-link.back:hover { background: var(--blue-dark); }
+    /* INTRODUCCIÓN */
+    .intro {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 15px; margin: 0 0 20px;
+    }
+    .eyebrow { margin: 0 0 5px; font-size: .76rem; text-transform: uppercase; letter-spacing: .07em; font-weight: 900; color: var(--muted); }
+    h1 { margin: 0; font-size: clamp(1.7rem,3.4vw,2.2rem); color: var(--blue-dark); }
+    .intro p:last-child { margin: 7px 0 0; color: var(--muted); font-weight: 700; line-height: 1.45; }
+    .count-pill { background: var(--cream); color: #6d4a1b; border-radius: 18px 18px 7px 18px; padding: 13px 16px; font-size: .92rem; font-weight: 900; white-space: nowrap; }
+    /* MENSAJE DEL BACKEND */
+    .alert-success {
+      position: relative; margin-bottom: 20px; padding: 17px 52px 17px 18px;
+      background: var(--green-pale); border: 1px solid #b9dcc8;
+      color: #1b6747; font-weight: 800; border-radius: 17px;
+      animation: arrive .35s var(--ease) both;
+    }
+    .alert-close { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); border: 0; color: #1b6747; background: transparent; font-size: 1.5rem; width: 35px; height: 35px; border-radius: 8px; }
+    .alert-close:hover { background: #c9e8d6; }
+    /* SECCIONES */
+    .workspace { display: grid; grid-template-columns: minmax(310px,.74fr) minmax(0,1.26fr); gap: 22px; align-items: start; }
+    .panel { background: var(--white); border: 1px solid var(--stroke); border-radius: 27px; box-shadow: var(--shadow); padding: 25px; min-width: 0; animation: arrive .45s var(--ease) both; }
+    .panel:nth-child(2) { animation-delay: .07s; }
+    .panel-heading { display: flex; align-items: center; gap: 13px; margin-bottom: 21px; }
+    .step-icon { display: grid; place-items: center; flex: none; width: 48px; height: 48px; background: var(--orange); color: #4a350f; border-radius: 17px 17px 8px 17px; font-weight: 900; font-size: 1.13rem; }
+    .step-icon.blue { background: var(--blue-pale); color: var(--blue-dark); }
+    .panel-eyebrow { margin: 0 0 2px; font-size: .75rem; color: var(--muted); font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
+    h2 { margin: 0; color: var(--blue-dark); font-size: 1.5rem; line-height: 1.12; }
+    .info-strip { margin: 0 0 21px; padding: 13px 15px; border-radius: 16px 16px 7px 16px; background: var(--cream); font-weight: 700; font-size: .9rem; line-height: 1.45; }
+    /* FORMULARIOS */
+    .product-form { display: flex; flex-direction: column; gap: 15px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field label { font-size: .91rem; font-weight: 900; color: var(--blue-dark); }
+    .field input, .field select {
+      width: 100%; min-height: 52px; padding: 12px 13px;
+      border: 2px solid var(--stroke); background: #f8fbfe; color: var(--ink);
+      border-radius: 13px; outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .field input:focus, .field select:focus { border-color: var(--blue); box-shadow: 0 0 0 4px var(--blue-pale); background: #fff; }
+    .field input[type=file] { padding: 10px; font-size: .85rem; background: #fff; }
+    .field input[type=file]::file-selector-button { border: 0; background: var(--blue-pale); color: var(--blue-dark); border-radius: 9px; padding: 8px 10px; margin-right: 10px; font-weight: 900; cursor: pointer; }
+    .field-help { font-size: .78rem; color: var(--muted); margin-top: -3px; }
+    .btn-primary, .btn-cancel { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 54px; width: 100%; padding: 12px 18px; border: 0; border-radius: 16px; font-weight: 900; font-size: .98rem; transition: transform .2s var(--ease), background .2s; }
+    .btn-primary { background: var(--green); color: #fff; box-shadow: 0 5px 0 #b8ddc8; }
+    .btn-primary:hover { background: #216e50; transform: translateY(-2px); }
+    .btn-primary:active { transform: translateY(2px); }
+    .btn-cancel { background: #edf3f7; color: var(--blue-dark); }
+    .btn-cancel:hover { background: var(--blue-pale); }
+    /* CATÁLOGO */
+    .catalog-tools { margin-bottom: 17px; }
+    .search-box { display: flex; align-items: center; gap: 9px; background: #f8fbfe; border: 2px solid var(--stroke); border-radius: 15px; padding: 0 14px; }
+    .search-box:focus-within { border-color: var(--blue); box-shadow: 0 0 0 4px var(--blue-pale); }
+    .search-box svg { width: 19px; height: 19px; flex: none; color: var(--muted); }
+    .search-box input { width: 100%; min-height: 52px; background: transparent; border: 0; outline: 0; color: var(--ink); }
+    .product-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; }
+    .product {
+      display: flex; flex-direction: column; overflow: hidden; min-width: 0;
+      border: 2px solid var(--stroke); border-radius: 21px 21px 10px 21px;
+      background: #fff; transition: transform .22s var(--ease), border-color .22s, box-shadow .22s;
+      animation: tileIn .34s var(--ease) both;
+    }
+    .product:nth-child(even) { border-radius: 21px 10px 21px 21px; }
+    .product:hover { transform: translateY(-4px); border-color: var(--blue); box-shadow: 0 12px 20px rgba(23,107,152,.12); }
+    .product-photo { height: 152px; background: var(--cream); overflow: hidden; }
+    .product-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .product-body { display: flex; flex: 1; flex-direction: column; gap: 9px; padding: 15px; }
+    .product-title { margin: 0; font-size: 1.07rem; font-weight: 900; color: var(--blue-dark); overflow-wrap: anywhere; }
+    .product-description { margin: 0; color: var(--muted); font-size: .86rem; line-height: 1.45; overflow-wrap: anywhere; }
+    .product-meta { display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-top: auto; }
+    .price { font-size: 1.12rem; color: var(--green); font-weight: 900; white-space: nowrap; }
+    .category { padding: 6px 9px; background: var(--cream); color: #73501d; font-size: .75rem; font-weight: 900; border-radius: 999px; white-space: nowrap; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 5px; }
+    .action-btn { text-align: center; text-decoration: none; border-radius: 12px; padding: 11px 7px; font-size: .86rem; font-weight: 900; border: 2px solid transparent; transition: transform .18s var(--ease), background .18s; }
+    .action-btn:hover { transform: translateY(-2px); }
+    .action-btn.edit { color: var(--blue-dark); background: var(--blue-pale); }
+    .action-btn.edit:hover { background: var(--sky); }
+    .action-btn.delete { color: #a93939; background: var(--red-pale); }
+    .action-btn.delete:hover { background: #fbdcd8; }
+    .empty { grid-column: 1 / -1; padding: 24px; background: var(--blue-pale); text-align: center; color: var(--blue-dark); border-radius: 17px; font-weight: 800; }
+    .hidden { display: none !important; }
+    /* MODAL DE EDICIÓN */
+    .modal { display: none; position: fixed; inset: 0; z-index: 1000; padding: 20px; background: rgba(18,47,68,.56); justify-content: center; align-items: center; }
+    .modal.open { display: flex; }
+    .modal-content { background: #fff; width: min(100%,520px); max-height: min(90vh,780px); overflow: auto; padding: 25px; border-radius: 25px; box-shadow: 0 22px 60px rgba(0,0,0,.2); animation: tileIn .25s var(--ease) both; }
+    .modal-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .modal-heading h2 { font-size: 1.4rem; }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+    body.modal-open { overflow: hidden; }
+    @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes tileIn { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @media (max-width: 1050px) { .workspace { grid-template-columns: 1fr; } .product-list { grid-template-columns: repeat(3,minmax(0,1fr)); } }
+    @media (max-width: 750px) { .product-list { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 560px) {
+      body { padding: 12px; } .topbar { padding: 15px; } .brand-mark { width: 54px; height: 54px; }
+      .brand-mark svg { width: 32px; height: 32px; } .header-actions { width: 100%; }
+      .top-link { flex: 1; font-size: .8rem; padding: 10px 8px; } .intro { align-items: flex-start; flex-direction: column; }
+      .panel { padding: 17px; border-radius: 22px; } .product-list { gap: 10px; }
+      .product-photo { height: 118px; } .product-body { padding: 11px; }
+      .product-meta { align-items: flex-start; flex-direction: column; }
+      .actions { gap: 6px; } .action-btn { font-size: .78rem; }
+      .modal-content { padding: 19px; } .modal-actions { gap: 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="topbar">
+      <a class="brand" href="{% url 'menuAdmin' %}" aria-label="Volver al panel de administración">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http\://www.w3.org/2000/svg">
+            <path d="M11 19h24v11a12 12 0 0 1-12 12 12 12 0 0 1-12-12V19Z" fill="#fff"/>
+            <path d="M35 22h4a5 5 0 0 1 0 10h-5" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+            <path d="M18 5c-3 4 3 6 0 10M27 5c-3 4 3 6 0 10" stroke="#F5B75A" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span>
+          <span class="brand-title">Café Tea Time</span>
+          <span class="brand-subtitle">Productos · Fundación Inclusión Azul</span>
+        </span>
+      </a>
+      <div class="header-actions">
+        <span class="user-badge">👋 {{ nombre }}</span>
+        <a href="{% url 'menu2' opcion=3 %}" class="top-link">Menú Vendedor</a>
+        <a href="/menuAdmin" class="top-link back">← Volver al panel</a>
+      </div>
+    </header>
+    <div class="intro">
+      <div>
+        <p class="eyebrow">Panel de administración</p>
+        <h1>Gestión de productos</h1>
+        <p>Agrega o actualiza los bebestibles y postres disponibles en el café.</p>
+      </div>
+      <div class="count-pill">☕ {{ pro|length }} productos</div>
+    </div>
+    {% if proceso == 1 %}
+    <div class="alert-success" id="alertExito" role="status">
+      ✓ Se ha <b>{{ procesoNombre }}</b> con éxito.
+      <button type="button" class="alert-close" onclick="document.getElementById('alertExito').remove()" aria-label="Cerrar mensaje">×</button>
+    </div>
+    {% endif %}
+    {% if messages %}
+      {% for message in messages %}
+      <div class="alert-success" role="status">
+        ✓ {{ message }}
+      </div>
+      {% endfor %}
+    {% endif %}
+    <div class="workspace">
+      <!-- MISMO FORMULARIO DJANGO PARA REGISTRAR PRODUCTOS -->
+      <section class="panel" aria-labelledby="crear-titulo">
+        <div class="panel-heading">
+          <span class="step-icon" aria-hidden="true">+</span>
+          <div>
+            <p class="panel-eyebrow">Agregar al menú</p>
+            <h2 id="crear-titulo">Nuevo producto</h2>
+          </div>
+        </div>
+        <p class="info-strip">☕ Completa los datos del producto y agrega una imagen para que sea fácil reconocerlo.</p>
+        <form class="product-form" action="/registrarProducto" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="field">
+            <label for="categoria">Categoría</label>
+            <select id="categoria" name="categoria" required>
+              <option value="Bebida">Bebestibles</option>
+              <option value="Postre">Postres</option>
+              <option value="Salado">Salados</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Ej.: Capuchino" required>
+          </div>
+          <div class="field">
+            <label for="descripcion">Descripción</label>
+            <input type="text" id="descripcion" name="descripcion" placeholder="Descripción sencilla del producto" required>
+          </div>
+          <div class="field">
+            <label for="precio">Precio (CLP)</label>
+            <input type="number" id="precio" name="precio" min="0" step="1" placeholder="Ej.: 3500" required>
+          </div>
+          <div class="field">
+            <label for="imagen">Imagen del producto</label>
+            <input type="file" id="imagen" name="imagen" accept="image/*" required>
+            <small class="field-help">Una foto clara ayuda a identificar el producto.</small>
+          </div>
+          <button type="submit" class="btn-primary">✓ Guardar producto</button>
+        </form>
+      </section>
+      <!-- PRODUCTOS YA REGISTRADOS -->
+      <section class="panel" aria-labelledby="productos-titulo">
+        <div class="panel-heading">
+          <span class="step-icon blue" aria-hidden="true">☕</span>
+          <div>
+            <p class="panel-eyebrow">Catálogo actual</p>
+            <h2 id="productos-titulo">Productos actuales</h2>
+          </div>
+        </div>
+        <div class="catalog-tools">
+          <label for="productSearch" class="field-help">Buscar entre los productos</label>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path>
+            </svg>
+            <input id="productSearch" type="search" placeholder="Buscar por nombre o categoría" autocomplete="off">
+          </div>
+        </div>
+        <div class="product-list" id="productList">
+          {% for x in pro %}
+          <article class="product" data-search="{{ x.nombre }} {{ x.descripcion }} {{ x.categoria }} {% if x.categoria == 'Bebida' %}Bebestibles{% elif x.categoria == 'Postre' %}Postres{% elif x.categoria == 'Salado' %}Salados{% endif %}">
+            <div class="product-photo">
+              <img src="../../media/{{ x.imagen }}" alt="{{ x.nombre }}" loading="lazy">
+            </div>
+            <div class="product-body">
+              <h3 class="product-title">{{ x.nombre }}</h3>
+              <p class="product-description">{{ x.descripcion }}</p>
+              <div class="product-meta">
+                <span class="price">${{ x.precio }}</span>
+                <span class="category">{% if x.categoria == 'Bebida' %}Bebestibles{% elif x.categoria == 'Postre' %}Postres{% elif x.categoria == 'Salado' %}Salados{% else %}{{ x.categoria }}{% endif %}</span>
+              </div>
+              <div class="actions">
+                <a href="/modificarProducto/{{ x.id }}"
+                   class="action-btn edit"
+                   data-id="{{ x.id }}"
+                   data-categoria="{{ x.categoria }}"
+                   data-nombre="{{ x.nombre }}"
+                   data-descripcion="{{ x.descripcion }}"
+                   data-precio="{{ x.precio }}">✎ Editar</a>
+                <a href="/eliminarProducto/{{ x.id }}"
+                   class="action-btn delete"
+                   data-nombre="{{ x.nombre }}">✕ Eliminar</a>
+              </div>
+            </div>
+          </article>
+          {% empty %}
+          <div class="empty">Todavía no hay productos registrados.</div>
+          {% endfor %}
+          <div class="empty hidden" id="noSearchResults">No se encontraron productos con ese nombre.</div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <!-- MODAL PARA MODIFICAR PRODUCTOS -->
+  <div class="modal" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" aria-hidden="true">
+    <div class="modal-content" tabindex="-1">
+      <div class="modal-heading">
+        <span class="step-icon blue" aria-hidden="true">✎</span>
+        <div>
+          <p class="panel-eyebrow">Actualizar menú</p>
+          <h2 id="editModalTitle">Editar producto</h2>
+        </div>
+      </div>
+      <form class="product-form" action="" method="POST" enctype="multipart/form-data" id="editForm">
+        {% csrf_token %}
+        <input type="hidden" id="edit-id" name="id">
+        <div class="field">
+          <label for="edit-categoria">Categoría</label>
+          <select id="edit-categoria" name="categoria" required>
+              <option value="Bebida">Bebestibles</option>
+              <option value="Postre">Postres</option>
+              <option value="Salado">Salados</option>
+            </select>
+            <small class="field-help" id="avisoCategoriaAnterior" hidden>Esta categoría no aparece en Menú Fácil. Selecciona Bebestibles, Postres o Salados y guarda los cambios.</small>
+        </div>
+        <div class="field">
+          <label for="edit-nombre">Nombre</label>
+          <input type="text" id="edit-nombre" name="nombre" required>
+        </div>
+        <div class="field">
+          <label for="edit-descripcion">Descripción</label>
+          <input type="text" id="edit-descripcion" name="descripcion" required>
+        </div>
+        <div class="field">
+          <label for="edit-precio">Precio (CLP)</label>
+          <input type="number" id="edit-precio" name="precio" min="0" step="1" required>
+        </div>
+        <div class="field">
+          <label for="edit-imagen">Nueva imagen (opcional)</label>
+          <input type="file" id="edit-imagen" name="imagen" accept="image/*">
+          <small class="field-help">Si no eliges una imagen, se conserva la actual, siempre que tu vista de Django lo permita.</small>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" id="cancelEdit">Cancelar</button>
+          <button type="submit" class="btn-primary">✓ Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    // Impedir un doble envío accidental al registrar un mismo producto.
+    const registro = document.querySelector('form[action="/registrarProducto"]');
+    if (registro) {
+      let enviando = false;
+      registro.addEventListener('submit', evento => {
+        if (enviando) {
+          evento.preventDefault();
+          return;
+        }
+        enviando = true;
+        const boton = registro.querySelector('button[type="submit"]');
+        if (boton) {
+          boton.disabled = true;
+          boton.textContent = 'Guardando...';
+        }
+      });
+    }
+    document.getElementById('edit-categoria').addEventListener('change', event => {
+      const valor = event.target.value;
+      document.getElementById('avisoCategoriaAnterior').hidden = ['Bebida', 'Postre', 'Salado'].includes(valor);
+    });
+    const modal = document.getElementById('editModal');
+    const editForm = document.getElementById('editForm');
+    let lastEditTrigger = null;
+    // Abre el formulario con los valores reales del producto, sin recargar la página.
+    function openEditModal(link) {
+      lastEditTrigger = link;
+      editForm.action = link.href;
+      document.getElementById('edit-id').value = link.dataset.id;
+            const selectCategoria = document.getElementById('edit-categoria');
+      // Mostrar una categoría antigua si el producto ya la tenía.
+      // Para publicarlo en Menú Fácil, cambiarla a Bebestibles o Postres.
+      [...selectCategoria.options].forEach(opcion => {
+        if (opcion.dataset.categoriaAnterior === 'si') opcion.remove();
+      });
+      const categoriaGuardada = link.dataset.categoria;
+      if (![...selectCategoria.options].some(opcion => opcion.value === categoriaGuardada)) {
+        const antigua = document.createElement('option');
+        antigua.value = categoriaGuardada;
+        antigua.textContent = categoriaGuardada + ' (categoría anterior)';
+        antigua.dataset.categoriaAnterior = 'si';
+        selectCategoria.appendChild(antigua);
+      }
+      selectCategoria.value = categoriaGuardada;
+      const ayudaCategoria = document.getElementById('avisoCategoriaAnterior');
+      ayudaCategoria.hidden = ['Bebida', 'Postre', 'Salado'].includes(categoriaGuardada);
+      document.getElementById('edit-nombre').value = link.dataset.nombre;
+      document.getElementById('edit-descripcion').value = link.dataset.descripcion;
+      let precio = link.dataset.precio.trim();
+      if (precio.includes(',')) precio = precio.replace(/**\.**/g, '').replace(',', '.');
+      document.getElementById('edit-precio').value = precio;
+      document.getElementById('edit-imagen').value = '';
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      document.getElementById('edit-nombre').focus();
+    }
+    function closeEditModal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+      editForm.reset();
+      if (lastEditTrigger) lastEditTrigger.focus();
+    }
+    document.querySelectorAll('.action-btn.edit').forEach(link => {
+      link.addEventListener('click', event => {
+        if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        openEditModal(link);
+      });
+    });
+    document.getElementById('cancelEdit').addEventListener('click', closeEditModal);
+    modal.addEventListener('click', event => {
+      if (event.target === modal) closeEditModal();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && modal.classList.contains('open')) closeEditModal();
+    });
+    // Solicitar confirmación para evitar eliminaciones accidentales.
+    document.querySelectorAll('.action-btn.delete').forEach(link => {
+      link.addEventListener('click', event => {
+        if (!window.confirm('¿Seguro que deseas eliminar "' + link.dataset.nombre + '"?')) {
+          event.preventDefault();
+        }
+      });
+    });
+    // Buscador local: solo filtra tarjetas, no modifica datos de Django.
+    function normalizeSearch(value) {
+      return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+    document.getElementById('productSearch').addEventListener('input', event => {
+      const termino = normalizeSearch(event.target.value.trim());
+      let visibles = 0;
+      document.querySelectorAll('#productList .product').forEach(card => {
+        const mostrar = normalizeSearch(card.dataset.search).includes(termino);
+        card.classList.toggle('hidden', !mostrar);
+        if (mostrar) visibles++;
+      });
+      document.getElementById('noSearchResults').classList.toggle('hidden', visibles !== 0 || termino === '');
+    });
+  </script>
+
+
+<script>
+/* Restauración desde el historial: revalidar permisos y sesión con Django. */
+window.addEventListener('pageshow', function (evento) {
+    const navegacion = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (evento.persisted || (navegacion && navegacion.type === 'back_forward')) {
+        window.location.reload();
+    }
+});
+</script>
+</body>
+</html>

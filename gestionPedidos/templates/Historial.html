@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+{% load filtros %}
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#176b98">
+  <title>Historial de pedidos — Café Tea Time · Fundación Inclusión Azul</title>
+  <style>
+    :root {
+      --bg: #edf5fa;
+      --paper: #ffffff;
+      --blue: #176b98;
+      --blue-dark: #104a6c;
+      --blue-pale: #dfeff8;
+      --sky: #bee3f4;
+      --cream: #fff6e6;
+      --orange: #f5b75a;
+      --green: #28845f;
+      --ink: #253746;
+      --muted: #647989;
+      --stroke: #d8e6ee;
+      --shadow: 0 12px 30px rgba(19,78,113,.08);
+      --ease: cubic-bezier(.2,.8,.2,1);
+      font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; min-height: 100vh; background: var(--bg); color: var(--ink); }
+    button, input { font: inherit; }
+    a { color: inherit; }
+    button:focus-visible, a:focus-visible, input:focus-visible {
+      outline: 3px solid var(--orange);
+      outline-offset: 3px;
+    }
+    .wrap { width: 100%; max-width: 1230px; margin: 0 auto; }
+
+    /* Mismo encabezado que el menú y el panel administrativo */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap; padding: 16px 21px;
+      margin-bottom: 23px; background: var(--paper);
+      border: 1px solid var(--stroke); border-radius: 24px;
+      box-shadow: var(--shadow); animation: rise .4s var(--ease) both;
+    }
+    .brand-link { display: flex; align-items: center; gap: 13px; min-width: 0; text-decoration: none; }
+    .brand-mark {
+      position: relative; display: grid; place-items: center;
+      width: 64px; height: 64px; flex: none;
+      background: var(--blue); color: #fff;
+      border-radius: 21px 21px 11px 21px;
+    }
+    .brand-mark svg { width: 38px; height: 38px; }
+    .brand-mark::after {
+      content: ''; position: absolute; right: -4px; top: -4px;
+      width: 11px; height: 11px; background: var(--orange);
+      border-radius: 50%; border: 2px solid var(--paper);
+    }
+    .brand-name { font-size: 1.2rem; line-height: 1.2; margin: 0 0 3px; color: var(--blue-dark); font-weight: 900; }
+    .brand-subtitle { margin: 0; color: var(--muted); font-size: .84rem; font-weight: 700; }
+    .header-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .user-badge {
+      display: inline-flex; align-items: center; min-height: 45px;
+      padding: 10px 14px; border-radius: 13px;
+      background: var(--blue-pale); color: var(--blue-dark);
+      font-weight: 900; font-size: .91rem;
+    }
+    .back-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 46px; padding: 11px 16px; border: 2px solid var(--blue);
+      border-radius: 14px; background: var(--blue); color: #fff;
+      text-decoration: none; font-weight: 900; font-size: .91rem;
+      transition: background .2s, transform .2s var(--ease);
+    }
+    .back-btn:hover { background: var(--blue-dark); transform: translateY(-2px); }
+
+    /* Contenedor de historial */
+    .card {
+      padding: 27px; margin-bottom: 24px; background: var(--paper);
+      border: 1px solid var(--stroke); border-radius: 27px;
+      box-shadow: var(--shadow); animation: rise .45s var(--ease) both;
+    }
+    .section-head { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .section-icon {
+      display: grid; place-items: center; flex: none;
+      width: 52px; height: 52px; border-radius: 18px 18px 9px 18px;
+      background: var(--orange); color: #4a350f;
+    }
+    .section-icon svg { width: 26px; height: 26px; }
+    .eyebrow {
+      margin: 0 0 4px; color: var(--muted); font-size: .76rem;
+      font-weight: 900; text-transform: uppercase; letter-spacing: .075em;
+    }
+    h1 { margin: 0; font-size: clamp(1.4rem, 2.8vw, 1.9rem); line-height: 1.16; color: var(--blue-dark); }
+    .helper {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--cream); padding: 13px 16px;
+      border-radius: 16px 16px 8px 16px; margin: 0 0 23px;
+      font-size: .93rem; font-weight: 700; line-height: 1.45;
+    }
+    .helper-icon { font-size: 1.35rem; flex: none; }
+
+    /* Filtros con campos grandes y claros */
+    .filters {
+      padding: 20px; border-radius: 20px; background: #f5f9fc;
+      border: 1px solid var(--stroke); margin-bottom: 22px;
+    }
+    .filters-title { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; color: var(--blue-dark); font-size: 1.04rem; font-weight: 900; }
+    .filter-grid { display: grid; grid-template-columns: minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) auto; gap: 13px; align-items: end; }
+    .filter-field { min-width: 0; }
+    .filter-field label { display: block; margin: 0 0 8px; color: var(--blue-dark); font-size: .87rem; font-weight: 900; }
+    .filter-field input {
+      width: 100%; min-height: 49px; margin: 0; padding: 11px 13px;
+      border: 2px solid var(--stroke); border-radius: 13px;
+      background: #fff; color: var(--ink); font-size: .92rem;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .filter-field input::placeholder { color: #8295a1; }
+    .filter-field input:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px var(--blue-pale); }
+    .filter-actions { display: flex; gap: 8px; align-items: center; }
+    .apply-btn, .clear-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 49px; padding: 11px 16px; border-radius: 13px;
+      font-weight: 900; white-space: nowrap; text-decoration: none;
+      font-size: .88rem; cursor: pointer;
+      transition: transform .2s var(--ease), background .2s;
+    }
+    .apply-btn { border: 2px solid var(--blue); background: var(--blue); color: #fff; }
+    .apply-btn:hover { background: var(--blue-dark); transform: translateY(-2px); }
+    .clear-btn { border: 2px solid var(--stroke); background: #fff; color: var(--blue-dark); }
+    .clear-btn:hover { background: var(--blue-pale); transform: translateY(-2px); }
+
+    .results-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 9px; margin-bottom: 14px; }
+    .results-heading h2 { margin: 0; color: var(--blue-dark); font-size: 1.15rem; }
+    .count-pill { display: inline-block; padding: 7px 12px; background: var(--blue-pale); color: var(--blue-dark); border-radius: 999px; font-size: .82rem; font-weight: 900; }
+
+    /* Tabla: scroll lateral en pantallas pequeñas, cabecera fija */
+    .history { max-height: 620px; overflow: auto; border: 1px solid var(--stroke); border-radius: 19px; }
+    .table-modern { width: 100%; min-width: 880px; border-collapse: separate; border-spacing: 0; text-align: left; }
+    .table-modern thead th {
+      position: sticky; top: 0; z-index: 2;
+      padding: 17px 15px; background: var(--blue); color: #fff;
+      font-size: .79rem; font-weight: 900; letter-spacing: .025em;
+      white-space: nowrap;
+    }
+    .table-modern thead th:first-child, .table-modern td:first-child { padding-left: 20px; }
+    .table-modern tbody tr { animation: rowIn .32s var(--ease) both; }
+    .table-modern tbody tr:nth-child(even) { background: #f5f9fc; }
+    .table-modern tbody tr:hover { background: #eaf4fa; }
+    .table-modern td { padding: 16px 15px; vertical-align: middle; line-height: 1.45; font-size: .91rem; border-bottom: 1px solid var(--stroke); }
+    .table-modern tbody tr:last-child td { border-bottom: 0; }
+    .order-id { display: inline-block; padding: 7px 11px; border-radius: 10px 10px 5px 10px; background: var(--blue-pale); color: var(--blue-dark); font-weight: 900; white-space: nowrap; }
+    .seller-name { font-weight: 800; }
+    .payment-pill { display: inline-flex; padding: 6px 10px; border-radius: 999px; background: var(--cream); color: #73501d; font-weight: 800; font-size: .83rem; white-space: nowrap; }
+    .date-text { color: var(--muted); font-weight: 700; white-space: nowrap; }
+    .product-entry { display: flex; align-items: baseline; gap: 8px; padding: 4px 0; }
+    .product-entry + .product-entry { border-top: 1px dashed var(--stroke); }
+    .product-name { font-weight: 700; overflow-wrap: anywhere; }
+    .quantity { flex: none; padding: 2px 7px; border-radius: 7px; background: var(--blue-pale); color: var(--blue-dark); font-weight: 900; font-size: .78rem; }
+    .order-total { color: var(--green); font-size: 1.03rem; font-weight: 900; white-space: nowrap; }
+    .empty-state { text-align: center; color: var(--muted); padding: 42px 16px !important; font-weight: 800; }
+    .scroll-help { margin: 12px 2px 0; color: var(--muted); font-size: .82rem; font-weight: 700; }
+
+    @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes rowIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 1080px) {
+      .filter-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .filter-actions { align-self: end; }
+    }
+    @media (max-width: 650px) {
+      body { padding: 12px; }
+      .topbar { padding: 15px; }
+      .brand-mark { width: 54px; height: 54px; }
+      .brand-mark svg { width: 32px; height: 32px; }
+      .header-actions { width: 100%; }
+      .back-btn { flex: 1; }
+      .card { padding: 17px; border-radius: 22px; }
+      .section-icon { width: 46px; height: 46px; }
+      .filters { padding: 14px; }
+      .filter-grid { grid-template-columns: 1fr; }
+      .filter-actions > * { flex: 1; }
+      .history { max-height: 70vh; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+
+    /* HISTORIAL DE PEDIDOS CANCELADOS */
+    .historial-atajos {display:flex;flex-wrap:wrap;gap:10px;margin:0 0 20px;}
+    .historial-atajos a {display:inline-flex;align-items:center;min-height:45px;
+        padding:10px 15px;text-decoration:none;border-radius:13px;font-weight:900;
+        background:var(--blue-pale);color:var(--blue-dark);}
+    .historial-atajos a:hover {background:var(--sky);}
+    .historial-atajos .atajo-cancelado {background:#fff0ee;color:#a43333;}
+    .historial-atajos .atajo-cancelado:hover {background:#f9d8d4;}
+    .cancelled-heading {color:#a43333 !important;}
+    .cancelled-count {background:#fff0ee;color:#a43333;}
+    .cancelled-motivo {font-weight:750;max-width:320px;overflow-wrap:anywhere;}
+    .cancelled-date {font-size:.88rem;white-space:nowrap;color:var(--muted);}
+    .cancelled-total {color:#a43333;font-weight:900;white-space:nowrap;}
+    .cancelled-table thead th {background:#9b4441;}
+    /* NUEVO: alertas de Cocina, distintas a las cancelaciones */
+    .historial-atajos .atajo-alerta {background:#fff4df;color:#764e0a;}
+    .historial-atajos .atajo-alerta:hover {background:#fbe9c9;}
+    .alerta-heading {color:#86571a !important;}
+    .alerta-count {background:#fff4df;color:#764e0a;}
+    .alerta-table thead th {background:#92611d;}
+    .alerta-motivo {font-weight:800;color:#8f3c31;max-width:270px;overflow-wrap:anywhere;}
+    .cancelacion-form {display:flex;flex-direction:column;gap:8px;min-width:200px;}
+    .cancelacion-form input {width:100%;min-height:42px;border:2px solid var(--stroke);border-radius:10px;padding:8px 10px;}
+    .cancelacion-form button {border:0;border-radius:11px;padding:11px 12px;background:#b33e3a;color:#fff;font-weight:900;cursor:pointer;}
+    .cancelacion-form button:hover {background:#902b28;}
+    .flash-message {margin-bottom:15px;padding:12px 16px;border-radius:14px;border:1px solid #c2e5d3;background:#e6f6ed;color:#135b3a;font-weight:800;}
+    .flash-error {border-color:#efc7c4;background:#fff1ef;color:#922f2a;}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="topbar">
+      <a href="{% url 'menuAdmin' %}" class="brand-link" aria-label="Volver al panel de administración">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 19h24v11a12 12 0 0 1-12 12 12 12 0 0 1-12-12V19Z" fill="#fff" />
+            <path d="M35 22h4a5 5 0 0 1 0 10h-5" stroke="#fff" stroke-width="4" stroke-linecap="round" />
+            <path d="M18 5c-3 4 3 6 0 10M27 5c-3 4 3 6 0 10" stroke="#F5B75A" stroke-width="3" stroke-linecap="round" />
+          </svg>
+        </span>
+        <span>
+          <span class="brand-name" style="display:block">Café Tea Time</span>
+          <span class="brand-subtitle" style="display:block">Historial · Fundación Inclusión Azul</span>
+        </span>
+      </a>
+      <div class="header-actions">
+        <div class="user-badge" id="userBadge">👋 {{ nombre }}</div>
+        <a class="back-btn" href="/menuAdmin">← Volver al panel</a>
+      </div>
+    </header>
+
+    <section class="card" aria-labelledby="historial-titulo">
+      <div class="section-head">
+        <span class="section-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="3" width="16" height="18" rx="3" />
+            <path d="M8 8h8M8 12h8M8 16h5" />
+          </svg>
+        </span>
+        <div>
+          <p class="eyebrow">Panel administrativo · Ventas</p>
+          <h1 id="historial-titulo">Historial de pedidos</h1>
+        </div>
+      </div>
+
+      <p class="helper"><span class="helper-icon" aria-hidden="true">☕</span>Revisa las ventas del café y encuentra pedidos por vendedor o por fecha.</p>
+
+      <!-- Los nombres de los filtros siguen siendo los mismos que utiliza Django. -->
+      <form method="get" id="filterForm" class="filters">
+        <h2 class="filters-title">⌕ Buscar pedidos</h2>
+        <div class="filter-grid">
+          <div class="filter-field">
+            <label for="usuario_filtro">Vendedor</label>
+            <input type="text" id="usuario_filtro" name="usuario_filtro"
+                   placeholder="Nombre o apellido"
+                   value="{{ request.GET.usuario_filtro }}">
+          </div>
+          <div class="filter-field">
+            <label for="fecha_inicio">Desde</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio"
+                   value="{{ request.GET.fecha_inicio }}">
+          </div>
+          <div class="filter-field">
+            <label for="fecha_fin">Hasta</label>
+            <input type="date" id="fecha_fin" name="fecha_fin"
+                   value="{{ request.GET.fecha_fin }}">
+          </div>
+          <div class="filter-actions">
+            <button class="apply-btn" type="submit">Aplicar filtros</button>
+            <a class="clear-btn" href="?" aria-label="Quitar todos los filtros">Limpiar</a>
+          </div>
+        </div>
+      </form>
+
+      {% regroup pedido|dictsort:"pedido.id" by pedido.id as pedidos_agrupados %}
+      <nav class="historial-atajos" aria-label="Secciones del historial">
+        <a href="#ventas">✓ Pedidos registrados</a>
+        <a href="#alertas-cocina" class="atajo-alerta">⚠ Pedidos con problema ({{ incidencias_cocina|length }})</a>
+        <a href="#cancelados" class="atajo-cancelado">✕ Pedidos cancelados ({{ pedidos_cancelados|length }})</a>
+      </nav>
+      <div class="results-heading" id="ventas">
+        <h2>Pedidos registrados</h2>
+        <span class="count-pill">{{ pedidos_agrupados|length }} pedido{{ pedidos_agrupados|length|pluralize }}</span>
+      </div>
+
+      <div id="historyList" class="history" role="region" aria-label="Historial de pedidos" tabindex="0">
+        <table class="table-modern">
+          <thead>
+            <tr>
+              <th scope="col">ID Pedido</th>
+              <th scope="col">Vendedor</th>
+              <th scope="col">Tipo de pago</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Productos (cantidad)</th>
+              <th scope="col">Total pedido</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pedido_agrupado in pedidos_agrupados %}
+            <tr>
+              <td><span class="order-id">#{{ pedido_agrupado.grouper }}</span></td>
+              <td class="seller-name">{{ pedido_agrupado.list.0.pedido.usuario.nombres }} {{ pedido_agrupado.list.0.pedido.usuario.apellidos }}</td>
+              <td><span class="payment-pill">{{ pedido_agrupado.list.0.pedido.tipoPago }}</span></td>
+              <td class="date-text">{{ pedido_agrupado.list.0.pedido.fecha|date:"d-m-Y H:i" }}</td>
+              <td>
+                {% for detalle in pedido_agrupado.list %}
+                <div class="product-entry">
+                  <span class="product-name">{{ detalle.producto.nombre }}</span>
+                  <span class="quantity">×{{ detalle.cantidad }}</span>
+                </div>
+                {% endfor %}
+              </td>
+              <td><span class="order-total">${{ pedido_agrupado.list.0.pedido.total }}</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="empty-state">No hay pedidos registrados o que cumplan con el filtro.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="scroll-help">En pantallas pequeñas, desliza la tabla horizontalmente para ver todas las columnas.</p>
+    </section>
+    <!-- NUEVO: alertas que Cocina reportó, aún no canceladas -->
+    <section class="card" id="alertas-cocina" aria-labelledby="tituloAlertas">
+      <div class="section-head">
+        <span class="section-icon" aria-hidden="true">⚠</span>
+        <div>
+          <p class="eyebrow">Panel administrativo · Cocina</p>
+          <h2 id="tituloAlertas" class="alerta-heading" style="margin:0;font-size:1.65rem;">Pedidos con problema</h2>
+        </div>
+      </div>
+      <p class="helper"><span class="helper-icon" aria-hidden="true">☕</span>
+        Cocina ha señalado un inconveniente en estos pedidos. No están cancelados todavía.
+        Puedes revisarlos y decidir si corresponde cancelarlos o devolverlos a preparación desde Cocina.
+      </p>
+      {% if messages %}
+        {% for message in messages %}
+          <div role="status" class="flash-message {% if message.tags == 'error' %}flash-error{% endif %}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      <div class="results-heading">
+        <h2>Alertas de Cocina</h2>
+        <span class="count-pill alerta-count">{{ incidencias_cocina|length }} con problema</span>
+      </div>
+      <div class="history" role="region" aria-label="Pedidos reportados por Cocina" tabindex="0">
+        <table class="table-modern alerta-table">
+          <thead><tr>
+            <th scope="col">ID</th><th scope="col">Vendedor</th>
+            <th scope="col">Fecha del pedido</th><th scope="col">Productos</th>
+            <th scope="col">Motivo informado por Cocina</th>
+            <th scope="col">Decisión de administración</th>
+          </tr></thead>
+          <tbody>
+            {% for incidencia in incidencias_cocina %}
+            <tr>
+              <td><span class="order-id">#{{ incidencia.pedido.id }}</span></td>
+              <td class="seller-name">{{ incidencia.pedido.usuario.nombres }} {{ incidencia.pedido.usuario.apellidos }}</td>
+              <td class="date-text">{{ incidencia.pedido.fecha|date:"d-m-Y H:i" }}</td>
+              <td>
+                {% for detalle in incidencia.pedido.detallepedido_set.all %}
+                  <div class="product-entry"><span class="product-name">{{ detalle.producto.nombre }}</span>
+                    <span class="quantity">×{{ detalle.cantidad }}</span></div>
+                {% empty %}
+                  <span class="date-text">Sin productos</span>
+                {% endfor %}
+              </td>
+              <td class="alerta-motivo">{{ incidencia.observacion|default:"Sin detalle" }}</td>
+              <td>
+                <form class="cancelacion-form" method="post"
+                      action="{% url 'cancelar_pedido' pedido_id=incidencia.pedido.id %}"
+                      onsubmit="return confirm('¿Confirmas la cancelación? El pedido saldrá de Cocina y quedará registrado como cancelado.');">
+                  {% csrf_token %}
+                  <label for="motivo-cancelacion-{{ incidencia.pedido.id }}">Motivo de cancelación</label>
+                  <input type="text" id="motivo-cancelacion-{{ incidencia.pedido.id }}"
+                         name="motivo_cancelacion" maxlength="250" required
+                         value="{{ incidencia.observacion }}">
+                  <button type="submit">Cancelar pedido</button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="empty-state">No hay pedidos con problemas pendientes de revisión para estos filtros.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="scroll-help">Para corregir y preparar el pedido, usa «Volver a preparación» en la pantalla de Cocina.</p>
+    </section>
+
+    <section class="card" id="cancelados" aria-labelledby="tituloCancelados">
+      <div class="section-head">
+        <span class="section-icon" aria-hidden="true">✕</span>
+        <div>
+          <p class="eyebrow">Panel administrativo · Cancelaciones</p>
+          <h2 id="tituloCancelados" class="cancelled-heading" style="margin:0;font-size:1.65rem;">Pedidos cancelados</h2>
+        </div>
+      </div>
+      <p class="helper"><span class="helper-icon" aria-hidden="true">🧾</span>
+        Consulta el motivo, los productos, cantidades y fechas de los pedidos cancelados.
+        Se respetan los filtros de vendedor y fechas de la parte superior.
+      </p>
+      <div class="results-heading">
+        <h2>Registro de cancelaciones</h2>
+        <span class="count-pill cancelled-count">{{ pedidos_cancelados|length }} cancelado{{ pedidos_cancelados|length|pluralize }}</span>
+      </div>
+      <div class="history" role="region" aria-label="Pedidos cancelados" tabindex="0">
+        <table class="table-modern cancelled-table">
+          <thead><tr>
+            <th scope="col">ID Pedido</th><th scope="col">Vendedor</th>
+            <th scope="col">Fecha del pedido</th><th scope="col">Cancelado el</th>
+            <th scope="col">Motivo de cancelación</th>
+            <th scope="col">Productos (cantidad)</th><th scope="col">Total</th>
+          </tr></thead>
+          <tbody>
+          {% for cancelado in pedidos_cancelados %}
+            <tr>
+              <td><span class="order-id">#{{ cancelado.id }}</span></td>
+              <td class="seller-name">{{ cancelado.usuario.nombres }} {{ cancelado.usuario.apellidos }}</td>
+              <td class="date-text">{{ cancelado.fecha|date:"d-m-Y H:i" }}</td>
+              <td class="cancelled-date">{{ cancelado.fecha_cancelacion|date:"d-m-Y H:i"|default:"Sin registro" }}</td>
+              <td class="cancelled-motivo">{{ cancelado.motivo_cancelacion|default:"No se registró un motivo" }}</td>
+              <td>
+                {% for detalle in cancelado.detallepedido_set.all %}
+                  <div class="product-entry"><span class="product-name">{{ detalle.producto.nombre }}</span>
+                    <span class="quantity">×{{ detalle.cantidad }}</span></div>
+                {% empty %}
+                  <span class="date-text">Sin productos asociados al registro</span>
+                {% endfor %}
+              </td>
+              <td><span class="cancelled-total">${{ cancelado.total }}</span></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7" class="empty-state">Todavía no hay pedidos cancelados que coincidan con los filtros.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="scroll-help">En pantallas pequeñas, desliza la tabla horizontalmente para leer todos los detalles.</p>
+    </section>
+
+  </main>
+
+<script>
+/* Restauración desde el historial: revalidar permisos y sesión con Django. */
+window.addEventListener('pageshow', function (evento) {
+    const navegacion = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (evento.persisted || (navegacion && navegacion.type === 'back_forward')) {
+        window.location.reload();
+    }
+});
+</script>
+</body>
+</html>

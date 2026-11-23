@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b98">
+  <title>Gestión de usuarios — Café Tea Time · Fundación Inclusión Azul</title>
+  <style>
+    :root {
+      --bg:#edf5fa; --white:#fff; --blue:#176b98; --blue-dark:#104a6c;
+      --blue-pale:#dfeff8; --sky:#bee3f4; --cream:#fff6e6;
+      --orange:#f5b75a; --green:#28845f; --green-pale:#e4f4eb;
+      --red:#c94c4c; --red-pale:#fff0ee; --ink:#253746;
+      --muted:#647989; --border:#d8e6ee;
+      --shadow:0 12px 30px rgba(19,78,113,.08);
+      --ease:cubic-bezier(.2,.8,.2,1);
+      font-family:'Trebuchet MS','Segoe UI',Arial,sans-serif;
+    }
+    *, *::before, *::after { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; padding:24px; background:var(--bg); color:var(--ink); }
+    body.modal-open { overflow:hidden; }
+    button, input, select { font:inherit; }
+    button { cursor:pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+      outline:3px solid var(--orange); outline-offset:3px;
+    }
+    .wrap { max-width:1230px; margin:0 auto; }
+
+    /* ENCABEZADO — MISMA IDENTIDAD DEL MENÚ */
+    .topbar {
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+      gap:16px; padding:16px 21px; background:var(--white);
+      border:1px solid var(--border); border-radius:24px;
+      box-shadow:var(--shadow); margin-bottom:24px; animation:appear .4s var(--ease) both;
+    }
+    .brand { display:flex; align-items:center; gap:13px; min-width:0; }
+    .brand-mark {
+      display:grid; place-items:center; position:relative; flex:none;
+      width:64px; height:64px; background:var(--blue); color:#fff;
+      border-radius:21px 21px 11px 21px;
+    }
+    .brand-mark svg { width:38px; height:38px; }
+    .brand-mark::after {
+      content:""; position:absolute; right:-4px; top:-4px; width:11px; height:11px;
+      background:var(--orange); border:2px solid #fff; border-radius:50%;
+    }
+    .brand-title { margin:0 0 2px; color:var(--blue-dark); font-size:1.21rem; font-weight:900; }
+    .brand-subtitle { margin:0; color:var(--muted); font-size:.87rem; font-weight:700; }
+    .header-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .user-badge {
+      background:var(--blue-pale); color:var(--blue-dark); padding:12px 14px;
+      border-radius:13px; font-size:.9rem; font-weight:900;
+    }
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; gap:9px;
+      min-height:46px; border:2px solid transparent; border-radius:14px;
+      padding:11px 17px; font-weight:900; font-size:.93rem;
+      text-decoration:none; transition:transform .2s var(--ease), background .2s, box-shadow .2s;
+    }
+    .btn:hover { transform:translateY(-2px); }
+    .btn:active { transform:scale(.98); }
+    .btn-primary { background:var(--blue); color:#fff; }
+    .btn-primary:hover { background:var(--blue-dark); box-shadow:0 6px 16px rgba(23,107,152,.17); }
+    .btn-back { color:var(--blue-dark); background:#fff; border-color:var(--border); }
+    .btn-back:hover { background:var(--blue-pale); }
+    .btn-cancel { background:#f0f4f7; color:var(--blue-dark); }
+    .btn-save { background:var(--green); color:#fff; }
+    .btn-save:hover { background:#216f50; }
+
+    /* CABECERA DE CONTENIDO */
+    .panel {
+      background:var(--white); border:1px solid var(--border); border-radius:27px;
+      box-shadow:var(--shadow); padding:27px; animation:appear .45s var(--ease) both;
+    }
+    .section-heading { display:flex; align-items:center; gap:14px; margin-bottom:17px; }
+    .section-icon {
+      display:grid; place-items:center; flex:none; width:52px; height:52px;
+      background:var(--orange); border-radius:18px 18px 9px 18px;
+      font-size:1.5rem;
+    }
+    .eyebrow { margin:0 0 4px; color:var(--muted); font-size:.76rem; font-weight:900; letter-spacing:.075em; text-transform:uppercase; }
+    h1 { margin:0; color:var(--blue-dark); font-size:clamp(1.45rem,2.6vw,1.9rem); line-height:1.15; }
+    .intro {
+      padding:14px 16px; margin:0 0 22px; color:var(--ink); background:var(--cream);
+      border-radius:17px 17px 8px 17px; font-size:.94rem; font-weight:700; line-height:1.5;
+    }
+    .tools { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; }
+    .search-box { position:relative; flex:1; max-width:430px; min-width:210px; }
+    .search-box input {
+      display:block; width:100%; min-height:49px; padding:12px 14px 12px 42px;
+      background:#f8fbfe; color:var(--ink); border:2px solid var(--border);
+      border-radius:15px; font-size:.95rem;
+    }
+    .search-box input:focus { border-color:var(--blue); outline:none; box-shadow:0 0 0 4px var(--blue-pale); }
+    .search-box svg { position:absolute; top:50%; left:14px; transform:translateY(-50%); width:19px; height:19px; color:var(--muted); pointer-events:none; }
+    .count { color:var(--blue-dark); font-weight:900; background:var(--blue-pale); border-radius:999px; padding:9px 13px; font-size:.85rem; }
+
+    /* TARJETAS DE USUARIO */
+    .users-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
+    .user-card {
+      display:flex; flex-direction:column; gap:13px; min-width:0;
+      padding:18px; border:2px solid var(--border); background:#fff;
+      border-radius:23px 23px 11px 23px;
+      transition:transform .22s var(--ease), border-color .22s, box-shadow .22s;
+      animation:tileArrive .35s var(--ease) both;
+    }
+    .user-card:nth-child(even) { border-radius:23px 11px 23px 23px; }
+    .user-card[hidden] { display:none; }
+    .user-card:hover { transform:translateY(-4px); border-color:var(--sky); box-shadow:0 11px 20px rgba(23,107,152,.12); }
+    .user-top { display:flex; align-items:center; gap:12px; min-width:0; }
+    .avatar {
+      display:grid; place-items:center; flex:none; width:54px; height:54px;
+      background:var(--blue-pale); color:var(--blue-dark);
+      border-radius:18px 18px 9px 18px; font-size:1.4rem;
+    }
+    .user-name { font-size:1.06rem; font-weight:900; color:var(--blue-dark); overflow-wrap:anywhere; }
+    .user-login { font-size:.86rem; color:var(--muted); font-weight:700; overflow-wrap:anywhere; margin-top:3px; }
+    .role-pill { display:inline-flex; align-self:flex-start; border-radius:999px; padding:7px 11px; background:var(--cream); color:#73501d; font-size:.81rem; font-weight:900; }
+    .actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:auto; padding-top:6px; }
+    .action-btn {
+      min-width:0; min-height:44px; border:0; border-radius:12px;
+      padding:9px 5px; font-weight:900; font-size:.84rem;
+      transition:transform .18s var(--ease), background .18s;
+    }
+    .action-btn:hover { transform:translateY(-2px); }
+    .view { color:var(--blue-dark); background:var(--blue-pale); }
+    .view:hover { background:var(--sky); }
+    .edit { color:#fff; background:var(--blue); }
+    .edit:hover { background:var(--blue-dark); }
+    .delete { color:#a43333; background:var(--red-pale); }
+    .delete:hover { background:#f9d8d4; }
+    .empty-state { padding:35px 16px; text-align:center; border:2px dashed var(--border); border-radius:18px; color:var(--muted); font-weight:800; grid-column:1/-1; }
+    .empty-state[hidden] { display:none; }
+
+    /* MENSAJES DE DJANGO */
+    .alert { display:flex; align-items:flex-start; gap:12px; border-radius:17px; padding:14px 15px; margin:0 0 19px; border:1px solid; font-weight:800; }
+    .alert-success { color:#1c6547; background:var(--green-pale); border-color:#bce2cb; }
+    .alert-error { color:#a43333; background:var(--red-pale); border-color:#efcac5; }
+    .alert-text { flex:1; }
+    .alert-close { flex:none; border:0; background:transparent; color:inherit; font-size:1.3rem; font-weight:900; min-width:30px; min-height:30px; }
+
+    /* VENTANAS MODALES */
+    .modal {
+      position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center;
+      padding:18px; background:rgba(16,49,72,.56); animation:fadeIn .2s ease both;
+    }
+    .modal[hidden] { display:none; }
+    .modal-content {
+      width:100%; max-width:520px; max-height:min(92vh,900px); overflow-y:auto;
+      padding:27px; background:#fff; border-radius:26px;
+      box-shadow:0 22px 50px rgba(0,0,0,.18); animation:tileArrive .28s var(--ease) both;
+    }
+    .modal-header { display:flex; align-items:center; gap:13px; margin-bottom:23px; }
+    .modal-header .avatar { background:var(--orange); color:#4a350f; }
+    .modal-header h2 { margin:0; font-size:1.42rem; color:var(--blue-dark); }
+    .modal-caption { margin:4px 0 0; color:var(--muted); font-size:.87rem; font-weight:700; }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .input-group { display:flex; flex-direction:column; gap:7px; min-width:0; }
+    .input-group.full { grid-column:1/-1; }
+    .input-group label { color:var(--blue-dark); font-weight:900; font-size:.88rem; }
+    .input-group input, .input-group select {
+      display:block; width:100%; min-height:49px; padding:12px;
+      background:#f8fbfe; border:2px solid var(--border);
+      border-radius:13px; color:var(--ink); font-size:.94rem;
+    }
+    .input-group input:focus, .input-group select:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-pale); }
+    .input-group input[readonly] { background:#edf2f5; color:#62717c; }
+    .input-help { margin:0; color:var(--muted); font-size:.77rem; line-height:1.4; }
+    .modal-actions { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:10px; margin-top:24px; }
+    .detail-row { display:flex; align-items:baseline; justify-content:space-between; gap:15px; border-bottom:1px solid var(--border); padding:12px 0; font-size:.92rem; }
+    .detail-row strong { color:var(--blue-dark); }
+    .detail-row span { text-align:right; overflow-wrap:anywhere; }
+    .detail-row:last-of-type { border-bottom:none; }
+
+    @keyframes appear { from {opacity:0; transform:translateY(12px)} to {opacity:1; transform:translateY(0)} }
+    @keyframes tileArrive { from {opacity:0; transform:translateY(10px) scale(.98)} to {opacity:1; transform:translateY(0) scale(1)} }
+    @keyframes fadeIn { from {opacity:0} to {opacity:1} }
+    @media (max-width:750px) {
+      body { padding:12px; }
+      .topbar { padding:15px; }
+      .brand-mark { width:54px; height:54px; }
+      .brand-mark svg { width:32px; height:32px; }
+      .header-actions { width:100%; }
+      .header-actions .btn { flex:1; }
+      .panel { padding:17px; border-radius:22px; }
+      .tools { align-items:stretch; }
+      .search-box { max-width:none; }
+    }
+    @media (max-width:480px) {
+      .users-list { grid-template-columns:1fr; }
+      .form-grid { grid-template-columns:1fr; }
+      .input-group.full { grid-column:auto; }
+      .modal-content { padding:19px; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11 19h24v11a12 12 0 0 1-12 12 12 12 0 0 1-12-12V19Z" fill="#fff"/>
+          <path d="M35 22h4a5 5 0 0 1 0 10h-5" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+          <path d="M18 5c-3 4 3 6 0 10M27 5c-3 4 3 6 0 10" stroke="#F5B75A" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <p class="brand-title">Café Tea Time</p>
+        <p class="brand-subtitle">Usuarios · Fundación Inclusión Azul</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="user-badge">👋 {{ nombre }}</span>
+      <button type="button" class="btn btn-primary" onclick="openModal()">＋ Nuevo usuario</button>
+      <a class="btn btn-back" href="/menuAdmin">← Volver al panel</a>
+    </div>
+  </header>
+
+  <main class="panel">
+    <div class="section-heading">
+      <span class="section-icon" aria-hidden="true">👥</span>
+      <div>
+        <p class="eyebrow">Panel de administración</p>
+        <h1>Gestión de usuarios</h1>
+      </div>
+    </div>
+    <p class="intro">☕ Revisa las cuentas, consulta perfiles y administra los accesos de Café Tea Time.</p>
+
+    {% if proceso == 1 %}
+    <div class="alert alert-success" role="status">
+      <span aria-hidden="true">✓</span>
+      <span class="alert-text">Se ha <strong>{{ procesoNombre }}</strong> con éxito.</span>
+      <button type="button" class="alert-close" aria-label="Cerrar mensaje" onclick="this.closest('.alert').remove()">×</button>
+    </div>
+    {% endif %}
+
+    {% if error == 7 %}
+    <div class="alert alert-error" role="alert">
+      <span aria-hidden="true">!</span>
+      <span class="alert-text">Este RUT ya está registrado. No se creó ni se modificó ningún usuario.</span>
+      <button type="button" class="alert-close" aria-label="Cerrar mensaje" onclick="this.closest('.alert').remove()">×</button>
+    </div>
+    {% elif error == 8 %}
+    <div class="alert alert-error" role="alert">
+      <span aria-hidden="true">!</span>
+      <span class="alert-text">El nombre de usuario ya existe. Elige otro nombre de acceso.</span>
+      <button type="button" class="alert-close" aria-label="Cerrar mensaje" onclick="this.closest('.alert').remove()">×</button>
+    </div>
+    {% elif error == 9 %}
+    <div class="alert alert-error" role="alert">
+      <span aria-hidden="true">!</span>
+      <span class="alert-text">Faltan datos obligatorios o el formato del RUT es inválido.</span>
+      <button type="button" class="alert-close" aria-label="Cerrar mensaje" onclick="this.closest('.alert').remove()">×</button>
+    </div>
+    {% endif %}
+
+    {% if error == 6 %}
+    <div class="alert alert-error" role="alert">
+      <span aria-hidden="true">!</span>
+      <span class="alert-text">No se puede eliminar a los administradores.</span>
+      <button type="button" class="alert-close" aria-label="Cerrar mensaje" onclick="this.closest('.alert').remove()">×</button>
+    </div>
+    {% endif %}
+
+    <div class="tools">
+      <label class="search-box">
+        <span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Buscar usuarios</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/>
+        </svg>
+        <input type="search" id="buscarUsuario" placeholder="Buscar por nombre, usuario o rol" autocomplete="off">
+      </label>
+      <span class="count" id="contadorUsuarios" aria-live="polite">Usuarios registrados</span>
+    </div>
+
+    <section class="users-list" id="usersList" aria-label="Usuarios registrados">
+      {% for x in usu %}
+      <article class="user-card"
+               data-search="{{ x.nombres }} {{ x.apellidos }} {{ x.usuario }} {{ x.rol }}">
+        <div class="user-top">
+          <span class="avatar" aria-hidden="true">👤</span>
+          <div>
+            <div class="user-name">{{ x.nombres }} {{ x.apellidos }}</div>
+            <div class="user-login">@{{ x.usuario }}</div>
+          </div>
+        </div>
+        <span class="role-pill">🔑 {{ x.rol }}</span>
+        <div class="actions">
+          <button type="button" class="action-btn view" data-action="view"
+            data-rut="{{ x.rut }}" data-usuario="{{ x.usuario }}"
+            data-nombres="{{ x.nombres }}" data-apellidos="{{ x.apellidos }}"
+            data-rol="{{ x.rol }}" data-complejidad="{{ x.complejidad }}">Ver perfil</button>
+          <button type="button" class="action-btn edit" data-action="edit"
+            data-rut="{{ x.rut }}" data-usuario="{{ x.usuario }}"
+            data-nombres="{{ x.nombres }}" data-apellidos="{{ x.apellidos }}"
+            data-rol="{{ x.rol }}" data-complejidad="{{ x.complejidad }}">Editar</button>
+          <button type="button" class="action-btn delete" data-action="delete"
+            data-rut="{{ x.rut }}" data-nombres="{{ x.nombres }}">Eliminar</button>
+        </div>
+      </article>
+      {% empty %}
+      <div class="empty-state">Aún no hay usuarios registrados.</div>
+      {% endfor %}
+      <div class="empty-state" id="sinResultados" hidden>No se encontraron usuarios con esa búsqueda.</div>
+    </section>
+  </main>
+</div>
+
+<!-- MODAL DE CREACIÓN / EDICIÓN -->
+<div class="modal" id="userModal" hidden>
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <span class="avatar" aria-hidden="true">👤</span>
+      <div>
+        <h2 id="modalTitle">Nuevo usuario</h2>
+        <p class="modal-caption">Completa los datos de la cuenta.</p>
+      </div>
+    </div>
+    <form action="/agregarUsuario" method="POST" id="formulario">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="input-group">
+          <label for="rut">RUT</label>
+          <input type="text" id="rut" name="rut" maxlength="9" required placeholder="RUT del usuario">
+        </div>
+        <div class="input-group">
+          <label for="usuario">Usuario</label>
+          <input type="text" id="usuario" name="usuario" required placeholder="Nombre de acceso" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label for="nombres">Nombres</label>
+          <input type="text" id="nombres" name="nombres" required placeholder="Nombres">
+        </div>
+        <div class="input-group">
+          <label for="apellidos">Apellidos</label>
+          <input type="text" id="apellidos" name="apellidos" required placeholder="Apellidos">
+        </div>
+        <div class="input-group">
+          <label for="rol">Rol</label>
+          <select id="rol" name="rol" required>
+            <option value="" disabled selected>Selecciona un rol</option>
+            <option value="Admin">Administrador</option>
+            <option value="Vendedor">Vendedor</option>
+            <option value="Cocina">Cocina</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="complejidad">Complejidad</label>
+          <select id="complejidad" name="complejidad" required>
+            <option value="" disabled selected>Selecciona complejidad</option>
+            <option value="Media">Nivel 1</option>
+            <option value="Baja">Nivel 2</option>
+          </select>
+        </div>
+        <div class="input-group full" id="passwordInputGroup">
+          <label for="password" id="passwordLabel">Contraseña</label>
+          <input type="password" id="password" name="password" required placeholder="Escribe una contraseña" autocomplete="new-password">
+          <p class="input-help" id="passwordHelp">La contraseña es obligatoria para un usuario nuevo.</p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button type="submit" class="btn btn-save" id="guardarUsuario">Guardar usuario</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL DE PERFIL -->
+<div class="modal" id="viewModal" hidden>
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="viewTitle">
+    <div class="modal-header">
+      <span class="avatar" aria-hidden="true">👁️</span>
+      <div>
+        <h2 id="viewTitle">Detalles del perfil</h2>
+        <p class="modal-caption">Información de la cuenta seleccionada.</p>
+      </div>
+    </div>
+    <div class="detail-row"><strong>RUT:</strong><span id="viewRut"></span></div>
+    <div class="detail-row"><strong>Usuario:</strong><span id="viewUsuario"></span></div>
+    <div class="detail-row"><strong>Nombres:</strong><span id="viewNombres"></span></div>
+    <div class="detail-row"><strong>Apellidos:</strong><span id="viewApellidos"></span></div>
+    <div class="detail-row"><strong>Rol:</strong><span id="viewRol"></span></div>
+    <div class="detail-row"><strong>Complejidad:</strong><span id="viewComplejidad"></span></div>
+    <div class="detail-row"><strong>Contraseña:</strong><span>********</span></div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-cancel" onclick="closeViewModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const userModal = document.getElementById('userModal');
+  const viewModal = document.getElementById('viewModal');
+  const form = document.getElementById('formulario');
+  let currentEditRut = null;
+  let lastFocusedElement = null;
+
+  function showModal(modal) {
+    lastFocusedElement = document.activeElement;
+    userModal.hidden = true;
+    viewModal.hidden = true;
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+    const firstField = modal.querySelector('input:not([readonly]), button');
+    if (firstField) firstField.focus();
+  }
+
+  function hideModal(modal) {
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
+    if (lastFocusedElement && lastFocusedElement.isConnected) lastFocusedElement.focus();
+  }
+
+  function openViewModal(rut, usuario, nombres, apellidos, rol, complejidad) {
+    document.getElementById('viewRut').textContent = rut;
+    document.getElementById('viewUsuario').textContent = usuario;
+    document.getElementById('viewNombres').textContent = nombres;
+    document.getElementById('viewApellidos').textContent = apellidos;
+    document.getElementById('viewRol').textContent = rol;
+    document.getElementById('viewComplejidad').textContent = complejidad;
+    showModal(viewModal);
+  }
+  function closeViewModal() { hideModal(viewModal); }
+
+  function openModal(mode='new', rut='', usuario='', nombres='', apellidos='', rol='', complejidad='') {
+    form.reset();
+    currentEditRut = mode === 'edit' ? rut : null;
+    document.getElementById('rut').value = rut;
+    document.getElementById('usuario').value = usuario;
+    document.getElementById('nombres').value = nombres;
+    document.getElementById('apellidos').value = apellidos;
+    document.getElementById('rol').value = rol;
+    document.getElementById('complejidad').value = complejidad;
+
+    const password = document.getElementById('password');
+    password.value = '';
+    const editing = mode === 'edit';
+    document.getElementById('modalTitle').textContent = editing ? 'Editar usuario' : 'Nuevo usuario';
+    document.getElementById('guardarUsuario').textContent = editing ? 'Guardar cambios' : 'Guardar usuario';
+    document.getElementById('rut').readOnly = editing;
+    document.getElementById('passwordLabel').textContent = editing ? 'Nueva contraseña' : 'Contraseña';
+    document.getElementById('passwordHelp').textContent = editing
+      ? 'Déjala vacía para mantener la contraseña actual.'
+      : 'La contraseña es obligatoria para un usuario nuevo.';
+    password.required = !editing;
+    password.placeholder = editing ? 'Opcional: nueva contraseña' : 'Escribe una contraseña';
+    form.action = editing ? '/editarUsuario/' + encodeURIComponent(rut) : '/agregarUsuario';
+    showModal(userModal);
+  }
+  function closeModal() { hideModal(userModal); form.reset(); }
+  function saveUser() { form.requestSubmit(); }
+
+  document.getElementById('usersList').addEventListener('click', function(event) {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+    const d = button.dataset;
+    if (d.action === 'view') {
+      openViewModal(d.rut, d.usuario, d.nombres, d.apellidos, d.rol, d.complejidad);
+    } else if (d.action === 'edit') {
+      openModal('edit', d.rut, d.usuario, d.nombres, d.apellidos, d.rol, d.complejidad);
+    } else if (d.action === 'delete') {
+      if (window.confirm('¿Quieres eliminar al usuario ' + d.nombres + '?')) {
+        window.location.href = '/eliminarUsuario/' + encodeURIComponent(d.rut);
+      }
+    }
+  });
+
+  [userModal, viewModal].forEach(modal => {
+    modal.addEventListener('click', event => {
+      if (event.target === modal) {
+        if (modal === userModal) closeModal();
+        else closeViewModal();
+      }
+    });
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      if (!viewModal.hidden) closeViewModal();
+      else if (!userModal.hidden) closeModal();
+    }
+  });
+
+  const searchInput = document.getElementById('buscarUsuario');
+  const userCards = Array.from(document.querySelectorAll('.user-card'));
+  const count = document.getElementById('contadorUsuarios');
+  searchInput.addEventListener('input', function() {
+    const term = searchInput.value.toLocaleLowerCase('es').trim();
+    let visible = 0;
+    userCards.forEach(card => {
+      const matches = card.dataset.search.toLocaleLowerCase('es').includes(term);
+      card.hidden = !matches;
+      if (matches) visible++;
+    });
+    document.getElementById('sinResultados').hidden = visible !== 0 || userCards.length === 0;
+    count.textContent = visible + (visible === 1 ? ' usuario' : ' usuarios');
+  });
+  count.textContent = userCards.length + (userCards.length === 1 ? ' usuario' : ' usuarios');
+</script>
+
+<script>
+/* Restauración desde el historial: revalidar permisos y sesión con Django. */
+window.addEventListener('pageshow', function (evento) {
+    const navegacion = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (evento.persisted || (navegacion && navegacion.type === 'back_forward')) {
+        window.location.reload();
+    }
+});
+</script>
+
+<script>
+/* Restricción visual solicitada: no copiar, cortar ni pegar en el campo
+   de contraseña. La seguridad real depende del hash en el servidor. */
+(function () {
+    const campo = document.getElementById('password');
+    if (!campo) return;
+    for (const accion of ['copy', 'cut', 'paste']) {
+        campo.addEventListener(accion, function (evento) {
+            evento.preventDefault();
+        });
+    }
+})();
+</script>
+</body>
+</html>

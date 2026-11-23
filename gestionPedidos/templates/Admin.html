@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b98">
+  <title>Panel de Administración — Café Tea Time · Fundación Inclusión Azul</title>
+  <style>
+    :root {
+      --bg: #edf5fa;
+      --paper: #ffffff;
+      --blue: #176b98;
+      --blue-dark: #104a6c;
+      --blue-pale: #dfeff8;
+      --sky: #bee3f4;
+      --cream: #fff6e6;
+      --orange: #f5b75a;
+      --ink: #253746;
+      --muted: #647989;
+      --stroke: #d8e6ee;
+      --shadow: 0 12px 30px rgba(19, 78, 113, .08);
+      --ease: cubic-bezier(.2, .8, .2, 1);
+      font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    a { color: inherit; }
+    a:focus-visible { outline: 3px solid var(--orange); outline-offset: 4px; }
+    .wrap { width: 100%; max-width: 1230px; margin: 0 auto; }
+
+    /* IDENTIDAD VISUAL: IGUAL AL MENÚ Y AL HISTORIAL */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 16px 21px;
+      margin-bottom: 24px;
+      background: var(--paper);
+      border: 1px solid var(--stroke);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      animation: appear .45s var(--ease) both;
+    }
+    .brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .brand-mark {
+      position: relative;
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 64px;
+      height: 64px;
+      background: var(--blue);
+      color: white;
+      border-radius: 21px 21px 11px 21px;
+    }
+    .brand-mark svg { width: 38px; height: 38px; }
+    .brand-mark::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 11px;
+      height: 11px;
+      background: var(--orange);
+      border: 2px solid white;
+      border-radius: 50%;
+    }
+    .brand-title { margin: 0 0 3px; font-size: 1.21rem; color: var(--blue-dark); font-weight: 900; }
+    .brand-subtitle { margin: 0; font-size: .87rem; color: var(--muted); font-weight: 700; }
+    .header-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 10px 14px;
+      background: var(--blue-pale);
+      color: var(--blue-dark);
+      border-radius: 13px;
+      font-size: .92rem;
+      font-weight: 900;
+    }
+    .logout-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 15px;
+      text-decoration: none;
+      background: white;
+      color: var(--blue-dark);
+      border: 2px solid var(--stroke);
+      border-radius: 13px;
+      font-size: .92rem;
+      font-weight: 900;
+      transition: transform .2s var(--ease), background .2s, border-color .2s;
+    }
+    .logout-btn:hover { background: var(--blue-pale); border-color: var(--blue); transform: translateY(-2px); }
+
+    /* BIENVENIDA */
+    .welcome {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      padding: 25px 29px;
+      margin-bottom: 22px;
+      background: var(--paper);
+      border: 1px solid var(--stroke);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      animation: appear .48s var(--ease) .05s both;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 10px;
+      font-size: .76rem;
+      letter-spacing: .075em;
+      text-transform: uppercase;
+      color: var(--blue);
+      font-weight: 900;
+    }
+    .eyebrow-dot { width: 9px; height: 9px; background: var(--orange); border-radius: 50%; }
+    .welcome h1 {
+      margin: 0 0 8px;
+      color: var(--blue-dark);
+      font-size: clamp(1.65rem, 3vw, 2.15rem);
+      line-height: 1.15;
+      font-weight: 900;
+    }
+    .welcome p:last-child { margin: 0; line-height: 1.5; color: var(--muted); font-weight: 700; }
+    .welcome-icon {
+      display: grid;
+      place-items: center;
+      width: 67px;
+      height: 67px;
+      flex: none;
+      background: var(--cream);
+      border-radius: 23px 23px 10px 23px;
+      font-size: 1.8rem;
+    }
+
+    /* ACCESOS DEL PANEL */
+    .dashboard { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .card {
+      --card-color: var(--blue);
+      --card-soft: var(--blue-pale);
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 19px;
+      min-height: 188px;
+      padding: 24px;
+      background: var(--paper);
+      border: 2px solid var(--stroke);
+      border-radius: 25px 25px 11px 25px;
+      text-decoration: none;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform .25s var(--ease), border-color .25s, box-shadow .25s;
+      animation: appear .46s var(--ease) both;
+    }
+    .card:nth-child(2) { border-radius: 25px 11px 25px 25px; animation-delay: .07s; }
+    .card:nth-child(3) { border-radius: 11px 25px 25px 25px; animation-delay: .12s; }
+    .card:nth-child(4) { animation-delay: .17s; }
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: var(--card-color);
+      box-shadow: 0 15px 30px rgba(19,78,113,.13);
+    }
+    .card:active { transform: scale(.985); }
+    .card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 24px;
+      bottom: 24px;
+      width: 5px;
+      background: var(--card-color);
+      border-radius: 0 5px 5px 0;
+    }
+    .card-icon {
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 86px;
+      height: 86px;
+      color: var(--card-color);
+      background: var(--card-soft);
+      border-radius: 29px 29px 13px 29px;
+      transition: transform .25s var(--ease);
+    }
+    .card:nth-child(even) .card-icon { border-radius: 29px 13px 29px 29px; }
+    .card:hover .card-icon { transform: rotate(-5deg) scale(1.06); }
+    .card-icon svg { width: 42px; height: 42px; stroke-width: 2.2; }
+    .card-text { min-width: 0; flex: 1; }
+    .card-title { display: block; margin-bottom: 8px; color: var(--ink); font-size: 1.35rem; font-weight: 900; }
+    .card-desc { display: block; max-width: 260px; color: var(--muted); font-size: .94rem; line-height: 1.5; font-weight: 700; }
+    .card-arrow {
+      display: grid;
+      place-items: center;
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      width: 31px;
+      height: 31px;
+      background: var(--card-soft);
+      color: var(--card-color);
+      border-radius: 10px 10px 5px 10px;
+      font-weight: 900;
+      transition: transform .25s var(--ease);
+    }
+    .card:hover .card-arrow { transform: translateX(3px); }
+    .pedido { --card-color: #28845f; --card-soft: #e4f4eb; }
+    .historial { --card-color: #176b98; --card-soft: #dfeff8; }
+    .usuarios { --card-color: #7255a7; --card-soft: #f0eaf8; }
+    .estadisticas { --card-color: #a66a16; --card-soft: #fff1d8; }
+    .footnote { margin: 22px 0 8px; text-align: center; color: var(--muted); font-size: .85rem; font-weight: 700; }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(13px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 800px) {
+      .dashboard { grid-template-columns: 1fr; }
+      .card { min-height: 150px; }
+    }
+    @media (max-width: 520px) {
+      body { padding: 12px; }
+      .topbar { padding: 15px; }
+      .brand-mark { width: 54px; height: 54px; }
+      .brand-mark svg { width: 32px; height: 32px; }
+      .header-actions { width: 100%; }
+      .logout-btn { flex: 1; }
+      .welcome { padding: 20px; }
+      .welcome-icon { width: 52px; height: 52px; font-size: 1.4rem; }
+      .card { padding: 19px; gap: 14px; min-height: 142px; }
+      .card-icon { width: 70px; height: 70px; }
+      .card-icon svg { width: 35px; height: 35px; }
+      .card-title { font-size: 1.17rem; }
+      .card-desc { font-size: .86rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 19h24v11a12 12 0 0 1-12 12 12 12 0 0 1-12-12V19Z" fill="currentColor"/>
+            <path d="M35 22h4a5 5 0 0 1 0 10h-5" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            <path d="M18 5c-3 4 3 6 0 10M27 5c-3 4 3 6 0 10" stroke="#F5B75A" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <p class="brand-title">Café Tea Time</p>
+          <p class="brand-subtitle">Administración · Fundación Inclusión Azul</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="user-badge" id="userBadge">👋 {{ nombre }}</div>
+        <a href="/logout" class="logout-btn" id="logoutBtn">Cerrar sesión</a>
+      </div>
+    </header>
+
+    <section class="welcome" aria-labelledby="welcomeTitle">
+      <div>
+        <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span> Área administrativa</p>
+        <h1 id="welcomeTitle">Panel de Administración</h1>
+        <p>Elige qué quieres gestionar. Cada opción te llevará a su sección.</p>
+      </div>
+      <div class="welcome-icon" aria-hidden="true">☕</div>
+    </section>
+
+    <nav class="dashboard" aria-label="Opciones de administración">
+      <a href="menuPedidos" class="card pedido">
+        <span class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="11" y="7" width="26" height="34" rx="5"/>
+            <path d="M18 7V5h12v2M17 18l3 3 6-7M17 31h14"/>
+          </svg>
+        </span>
+        <span class="card-text">
+          <span class="card-title">Pedidos</span>
+          <span class="card-desc">Gestiona y revisa los pedidos activos.</span>
+        </span>
+        <span class="card-arrow" aria-hidden="true">→</span>
+      </a>
+
+      <a href="historial" class="card historial">
+        <span class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="10" y="7" width="28" height="34" rx="5"/>
+            <path d="M17 17h14M17 24h14M17 31h9"/>
+          </svg>
+        </span>
+        <span class="card-text">
+          <span class="card-title">Historial</span>
+          <span class="card-desc">Consulta las ventas y los pedidos anteriores.</span>
+        </span>
+        <span class="card-arrow" aria-hidden="true">→</span>
+      </a>
+
+      <a href="usuarios" class="card usuarios">
+        <span class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="20" cy="17" r="6"/>
+            <path d="M8 38v-3a12 12 0 0 1 24 0v3M34 12a6 6 0 0 1 0 12M36 30a9 9 0 0 1 4 8"/>
+          </svg>
+        </span>
+        <span class="card-text">
+          <span class="card-title">Usuarios</span>
+          <span class="card-desc">Administra las cuentas y los accesos.</span>
+        </span>
+        <span class="card-arrow" aria-hidden="true">→</span>
+      </a>
+
+      <a href="estadisticas" class="card estadisticas">
+        <span class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 39h30"/>
+            <rect x="13" y="24" width="6" height="15" rx="2"/>
+            <rect x="23" y="16" width="6" height="23" rx="2"/>
+            <rect x="33" y="9" width="6" height="30" rx="2"/>
+          </svg>
+        </span>
+        <span class="card-text">
+          <span class="card-title">Estadísticas</span>
+          <span class="card-desc">Explora las métricas y los reportes del café.</span>
+        </span>
+        <span class="card-arrow" aria-hidden="true">→</span>
+      </a>
+    </nav>
+
+    <p class="footnote">💙 Fundación Inclusión Azul · Gestión clara, sencilla e inclusiva</p>
+  </main>
+
+<script>
+/* Restauración desde el historial: revalidar permisos y sesión con Django. */
+window.addEventListener('pageshow', function (evento) {
+    const navegacion = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (evento.persisted || (navegacion && navegacion.type === 'back_forward')) {
+        window.location.reload();
+    }
+});
+</script>
+</body>
+</html>
+

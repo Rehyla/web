@@ -1,0 +1,628 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#176b98">
+    <title>Iniciar sesión — Café Tea Time · Fundación Inclusión Azul</title>
+
+    <style>
+        :root {
+            --bg: #edf5fa;
+            --white: #ffffff;
+            --blue: #176b98;
+            --blue-dark: #104a6c;
+            --blue-pale: #dfeff8;
+            --sky: #bee3f4;
+            --cream: #fff6e6;
+            --orange: #f5b75a;
+            --green: #28845f;
+            --red: #c94c4c;
+            --ink: #253746;
+            --muted: #647989;
+            --border: #d8e6ee;
+            --shadow: 0 16px 38px rgba(19, 78, 113, .11);
+            --ease: cubic-bezier(.2, .8, .2, 1);
+            font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 26px;
+            background: var(--bg);
+            color: var(--ink);
+        }
+
+        button, input {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: 3px solid var(--orange);
+            outline-offset: 3px;
+        }
+
+        /* CONTENEDOR GENERAL */
+        .layout {
+            width: min(100%, 1020px);
+            display: grid;
+            grid-template-columns: 1.03fr 1fr;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: enter .48s var(--ease) both;
+        }
+
+        /* PANEL DE BIENVENIDA */
+        .welcome {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 24px;
+            padding: clamp(30px, 5vw, 58px);
+            background: var(--blue);
+            color: var(--white);
+            overflow: hidden;
+        }
+
+        .welcome::after {
+            content: '';
+            position: absolute;
+            right: -75px;
+            bottom: -95px;
+            width: 250px;
+            height: 250px;
+            border: 26px solid rgba(255,255,255,.11);
+            border-radius: 38% 62% 60% 40%;
+            pointer-events: none;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mark {
+            display: grid;
+            place-items: center;
+            flex: none;
+            width: 72px;
+            height: 72px;
+            background: var(--white);
+            color: var(--blue);
+            border-radius: 25px 25px 12px 25px;
+        }
+
+        .mark svg {
+            width: 45px;
+            height: 45px;
+        }
+
+        .brand-name {
+            font-weight: 900;
+            font-size: 1.25rem;
+            line-height: 1.15;
+        }
+
+        .brand-sub {
+            display: block;
+            font-size: .85rem;
+            font-weight: 700;
+            margin-top: 5px;
+            color: #dbedf7;
+        }
+
+        .welcome h1 {
+            position: relative;
+            z-index: 1;
+            font-weight: 900;
+            font-size: clamp(2rem, 4.5vw, 3.1rem);
+            line-height: 1.08;
+            margin: 7px 0 0;
+            letter-spacing: -.035em;
+        }
+
+        .welcome h1 span {
+            color: var(--orange);
+        }
+
+        .welcome p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin: 0;
+            max-width: 340px;
+            color: #f0f8fd;
+            font-weight: 600;
+        }
+
+        .welcome-note {
+            position: relative;
+            z-index: 1;
+            align-self: flex-start;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            border-radius: 16px 16px 7px 16px;
+            padding: 12px 15px;
+            background: var(--cream);
+            color: var(--blue-dark);
+            font-size: .9rem;
+            font-weight: 900;
+        }
+
+        .welcome-note .dot {
+            width: 10px;
+            height: 10px;
+            background: var(--orange);
+            border-radius: 50%;
+        }
+
+        /* FORMULARIO DE INGRESO */
+        .login-side {
+            padding: clamp(26px, 5vw, 60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .step {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .step-icon {
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 15px 15px 7px 15px;
+            background: var(--orange);
+            color: #4a350f;
+            font-weight: 900;
+        }
+
+        .step-text {
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-size: .78rem;
+            font-weight: 900;
+        }
+
+        .login-side h2 {
+            color: var(--blue-dark);
+            font-size: clamp(1.65rem, 3vw, 2rem);
+            margin: 0 0 8px;
+        }
+
+        .intro {
+            margin: 0 0 25px;
+            color: var(--muted);
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 17px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            color: var(--blue-dark);
+            font-size: .95rem;
+            font-weight: 900;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap input {
+            display: block;
+            width: 100%;
+            min-height: 57px;
+            padding: 15px 17px;
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            background: #f8fbfe;
+            color: var(--ink);
+            font-size: 1rem;
+            font-weight: 650;
+            transition: border-color .2s,
+                        background .2s,
+                        box-shadow .2s;
+        }
+
+        .input-wrap input:hover {
+            border-color: var(--sky);
+        }
+
+        .input-wrap input:focus {
+            border-color: var(--blue);
+            background: var(--white);
+            box-shadow: 0 0 0 4px var(--blue-pale);
+            outline: none;
+        }
+
+        .input-wrap input::placeholder {
+            color: #8799a5;
+            font-weight: 500;
+        }
+
+        #password {
+            padding-right: 82px;
+        }
+
+        /* MOSTRAR Y OCULTAR CONTRASEÑA */
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            border: 0;
+            border-radius: 10px;
+            background: var(--blue-pale);
+            color: var(--blue-dark);
+            padding: 9px 10px;
+            font-size: .81rem;
+            font-weight: 900;
+        }
+
+        .toggle-password:hover {
+            background: var(--sky);
+        }
+
+        /* BOTÓN PRINCIPAL */
+        .login-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 61px;
+            margin-top: 4px;
+            padding: 14px;
+            border: none;
+            border-radius: 18px;
+            background: var(--green);
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 900;
+            box-shadow: 0 6px 0 #b8ddc8;
+            transition: transform .2s var(--ease),
+                        background .2s,
+                        box-shadow .2s;
+        }
+
+        .login-btn:hover:not(:disabled) {
+            background: #216e50;
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #b8ddc8;
+        }
+
+        .login-btn:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #b8ddc8;
+        }
+
+        .login-btn:disabled {
+            opacity: .78;
+            cursor: progress;
+        }
+
+        /* MENSAJES DE ERROR DE DJANGO */
+        .server-message {
+            margin: 0;
+            padding: 13px 15px;
+            border-radius: 14px;
+            border: 1px solid #ecc4c0;
+            background: #fff0ee;
+            color: #a43333;
+            line-height: 1.5;
+            font-weight: 800;
+            font-size: .91rem;
+        }
+
+        .footer-note {
+            margin: 25px 0 0;
+            text-align: center;
+            color: var(--muted);
+            font-size: .83rem;
+            line-height: 1.5;
+            font-weight: 700;
+        }
+
+        /* ANIMACIÓN SUAVE DE ENTRADA */
+        @keyframes enter {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* DISEÑO RESPONSIVE */
+        @media (max-width: 790px) {
+            body {
+                padding: 15px;
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+                max-width: 530px;
+            }
+
+            .welcome {
+                padding: 23px 26px;
+                gap: 11px;
+            }
+
+            .welcome h1 {
+                font-size: 1.65rem;
+                margin: 0;
+            }
+
+            .welcome p {
+                font-size: .94rem;
+            }
+
+            .welcome-note {
+                display: none;
+            }
+
+            .brand .mark {
+                width: 55px;
+                height: 55px;
+                border-radius: 19px 19px 9px 19px;
+            }
+
+            .brand .mark svg {
+                width: 35px;
+                height: 35px;
+            }
+
+            .login-side {
+                padding: 28px 26px 32px;
+            }
+        }
+
+        /* ACCESIBILIDAD: REDUCIR ANIMACIONES */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="layout">
+
+        <!-- PANEL IZQUIERDO -->
+        <section class="welcome" aria-labelledby="welcome-title">
+
+            <div class="brand">
+                <div class="mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48"
+                         fill="none"
+                         xmlns="http://www.w3.org/2000/svg">
+
+                        <path d="M11 19h24v11a12 12 0 0 1-12 12 12 12 0 0 1-12-12V19Z"
+                              fill="currentColor"/>
+
+                        <path d="M35 22h4a5 5 0 0 1 0 10h-5"
+                              stroke="currentColor"
+                              stroke-width="4"
+                              stroke-linecap="round"/>
+
+                        <path d="M18 5c-3 4 3 6 0 10M27 5c-3 4 3 6 0 10"
+                              stroke="#F5B75A"
+                              stroke-width="3"
+                              stroke-linecap="round"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <div class="brand-name">Café Tea Time</div>
+                    <span class="brand-sub">
+                        Fundación Inclusión Azul
+                    </span>
+                </div>
+            </div>
+
+            <h1 id="welcome-title">
+                ¡Qué bueno <span>verte!</span>
+            </h1>
+
+            <p>
+                Un espacio para aprender, participar y atender
+                con confianza. Inicia sesión para comenzar.
+            </p>
+
+            <div class="welcome-note">
+                <span class="dot" aria-hidden="true"></span>
+                Un paso a la vez, a tu ritmo ☕
+            </div>
+
+        </section>
+
+        <!-- PANEL DERECHO -->
+        <section class="login-side" aria-labelledby="login-title">
+
+            <div class="step">
+                <span class="step-icon" aria-hidden="true">1</span>
+                <span class="step-text">Primer paso · Ingreso</span>
+            </div>
+
+            <h2 id="login-title">Iniciar sesión</h2>
+
+            <p class="intro">
+                Escribe tu usuario y contraseña para acceder al menú.
+            </p>
+
+            <form id="loginForm" action="/login" method="post">
+                {% csrf_token %}
+
+                <div class="field">
+                    <label for="username">Usuario</label>
+
+                    <div class="input-wrap">
+                        <input id="username"
+                               name="username"
+                               type="text"
+                               autocomplete="username"
+                               placeholder="Escribe tu usuario"
+                               required
+                               autofocus>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="password">Contraseña</label>
+
+                    <div class="input-wrap">
+                        <input id="password"
+                               name="password"
+                               type="password"
+                               autocomplete="current-password"
+                               placeholder="Escribe tu contraseña"
+                               required>
+
+                        <button id="togglePassword"
+                                class="toggle-password"
+                                type="button"
+                                aria-label="Mostrar contraseña"
+                                aria-pressed="false">
+                            Mostrar
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit"
+                        class="login-btn"
+                        id="loginBtn">
+                    Ingresar <span aria-hidden="true">→</span>
+                </button>
+
+                <!-- MENSAJES DEL BACKEND ORIGINAL -->
+                {% if error == 0 %}
+                    <p class="server-message" role="alert">
+                        Debes iniciar sesión para continuar.
+                    </p>
+
+                {% elif error == 1 %}
+                    <p class="server-message" role="alert">
+                        No tienes permisos para acceder.
+                    </p>
+
+                {% elif error == 3 or error == 5 %}
+                    <p class="server-message" role="alert">
+                        Usuario y/o contraseña incorrecta.
+                        Inténtalo nuevamente.
+                    </p>
+                {% endif %}
+
+            </form>
+
+            <p class="footer-note">
+                💙 Fundación Inclusión Azul · Atención sencilla e inclusiva
+            </p>
+
+        </section>
+    </main>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const btn = document.getElementById('loginBtn');
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+
+        // MOSTRAR Y OCULTAR CONTRASEÑA
+        togglePassword.addEventListener('click', function () {
+            const visible = passwordInput.type === 'password';
+
+            passwordInput.type = visible ? 'text' : 'password';
+
+            togglePassword.textContent = visible ? 'Ocultar' : 'Mostrar';
+
+            togglePassword.setAttribute(
+                'aria-label',
+                visible ? 'Ocultar contraseña' : 'Mostrar contraseña'
+            );
+
+            togglePassword.setAttribute(
+                'aria-pressed',
+                visible ? 'true' : 'false'
+            );
+
+            passwordInput.focus();
+        });
+
+        // ENVIAR FORMULARIO A DJANGO
+        form.addEventListener('submit', function () {
+            // Django valida usuario y contraseña en el servidor.
+            btn.disabled = true;
+            btn.textContent = 'Ingresando...';
+        });
+    </script>
+
+
+<script>
+/* Restauración desde el historial: revalidar permisos y sesión con Django. */
+window.addEventListener('pageshow', function (evento) {
+    const navegacion = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (evento.persisted || (navegacion && navegacion.type === 'back_forward')) {
+        window.location.reload();
+    }
+});
+</script>
+
+<script>
+/* Restricción visual solicitada: no copiar, cortar ni pegar en el campo
+   de contraseña. La seguridad real depende del hash en el servidor. */
+(function () {
+    const campo = document.getElementById('password');
+    if (!campo) return;
+    for (const accion of ['copy', 'cut', 'paste']) {
+        campo.addEventListener(accion, function (evento) {
+            evento.preventDefault();
+        });
+    }
+})();
+</script>
+</body>
+</html>
